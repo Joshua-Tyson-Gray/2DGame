@@ -4,17 +4,16 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 public class InputController implements KeyListener {
-	//TODO: Make this a singleton
+	//TODO: Make this a singleton?
 	
-	boolean upPressed = false;
-	boolean downPressed = false;
-	boolean rightPressed = false;
-	boolean leftPressed = false;
+	public boolean upPressed = false;
+	public boolean downPressed = false;
+	public boolean rightPressed = false;
+	public boolean leftPressed = false;
 
 	@Override
 	public void keyPressed(KeyEvent e) {
 		int keyCode = e.getKeyCode();
-		
 		switch(keyCode) {
 			case KeyEvent.VK_W:
 				upPressed = true;

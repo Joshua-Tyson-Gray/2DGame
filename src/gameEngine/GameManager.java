@@ -11,18 +11,19 @@ import javax.swing.JPanel;
 public class GameManager extends JPanel implements Runnable{
 	
 	
-	InputController inpCtrl = new InputController();
-	Thread gameThread;
-	WorldData world;
-	final int FPS = 60;
-	final int screenWidth;
-	final int screenHeight;
+	private InputController inpCtrl = new InputController();
+	private Thread gameThread;
+	private WorldData world;
+	private final int FPS = 60;
+	private final int screenWidth;
+	private final int screenHeight;
 	
 	public GameManager(){
 		world = new WorldData(inpCtrl);
+		
 		//TODO: It would be better to determine the screen size first and use that to dictate how large the tiles will be instead.
-		screenWidth = world.tileSize * world.maxScreenCol;
-		screenHeight = world.tileSize * world.maxScreenRow;
+		screenWidth = world.getTileSize() * world.getMaxScreenCol();
+		screenHeight = world.getTileSize() * world.getMaxScreenRow();
 		
 		this.setPreferredSize(new Dimension(screenWidth, screenHeight));
 		this.setBackground(Color.DARK_GRAY);
@@ -61,8 +62,7 @@ public class GameManager extends JPanel implements Runnable{
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		Graphics2D g2 = (Graphics2D)g;
-		g2.setColor(Color.WHITE);
-		g2.fillRect(world.playerX, world.playerY, world.tileSize, world.tileSize);
+		world.render(g2);
 		g2.dispose();
 	}
 	
@@ -70,7 +70,7 @@ public class GameManager extends JPanel implements Runnable{
 		JFrame window = new JFrame();
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		window.setResizable(false);
-		window.setTitle("2S Game");
+		window.setTitle("2D Game");
 		
 		GameManager gm = new GameManager();
 		window.add(gm);
