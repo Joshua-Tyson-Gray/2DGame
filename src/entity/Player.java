@@ -58,6 +58,7 @@ public class Player extends Entity{
 
 	@Override
 	public void update() {
+		//TODO: Properly account for contradicting directions.
 		//Account for diagonal speed
 		speed = (isDiagonalDirection() ? defaultDiagonalSpeed : defaultSpeed);
 		

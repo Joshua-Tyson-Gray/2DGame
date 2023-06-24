@@ -14,10 +14,10 @@ import javax.imageio.ImageIO;
  *
  */
 public class SpriteSheet {
-	//TODO: Store each sprite as an image instead of recalculating every time.
+	//TODO: Clarify idle sprite from walking sprites
 	
 	private BufferedImage spriteSheet;
-	private HashMap<String, int[]> spriteMap;
+	private HashMap<String, BufferedImage[]> spriteSets;
 	
 	/**
 	 * Generates a SpriteSheet from the image path passed. Assumes the tiles are exact squares.
@@ -35,16 +35,25 @@ public class SpriteSheet {
 	 * @param tileSizeY Height of the tiles
 	 */
 	public SpriteSheet(String spriteSheetPath, int tileSizeX, int tileSizeY) throws IOException{
-		spriteMap = new HashMap<String, int[]>();
 		try {
-			this.spriteSheet = ImageIO.read(getClass().getResourceAsStream(spriteSheetPath));
+			spriteSheet = ImageIO.read(getClass().getResourceAsStream(spriteSheetPath));
 		}catch(IOException e) {
 			throw e;
 		}
-		spriteMap.put("front", new int[]{8, 4, tileSizeX, tileSizeY});
-		spriteMap.put("back", new int[]{72, 4, tileSizeX, tileSizeY});
-		spriteMap.put("right", new int[]{42, 4, tileSizeX, tileSizeY});
-		spriteMap.put("left", new int[]{42, 4, tileSizeX, tileSizeY});
+		
+		spriteSets = new HashMap<String, BufferedImage[]>();
+		spriteSets.put("front", new BufferedImage[] {
+				spriteSheet.getSubimage(8, 4, tileSizeX, tileSizeY)
+		});
+		spriteSets.put("back", new BufferedImage[] {
+				spriteSheet.getSubimage(72, 4, tileSizeX, tileSizeY)
+		});
+		spriteSets.put("right", new BufferedImage[] {
+				flipSpriteHorizontally(spriteSheet.getSubimage(42, 4, tileSizeX, tileSizeY))
+		});
+		spriteSets.put("left", new BufferedImage[] {
+				spriteSheet.getSubimage(42, 4, tileSizeX, tileSizeY)
+		});
 	}
 	
 	/**
@@ -70,10 +79,7 @@ public class SpriteSheet {
 	 * @return BufferedImage of the sprite corresponding to the key
 	 */
 	public BufferedImage getSprite(String key) {
-		BufferedImage image = this.spriteSheet.getSubimage(spriteMap.get(key)[0], spriteMap.get(key)[1], spriteMap.get(key)[2], spriteMap.get(key)[3]);
-		if(key == "right") {
-			image = flipSpriteHorizontally(image);
-		}
-		return image;
+		//TODO: Account for animation
+		return spriteSets.get(key)[0];
 	}
 }
