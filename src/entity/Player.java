@@ -17,6 +17,8 @@ public class Player extends Entity{
 	private InputController inpCtrl;
 	private WorldData world;
 	private String direction = "front";
+	final int defaultSpeed;
+	final int defaultDiagonalSpeed;
 	
 	/**
 	 * Constructor for the Player entity.
@@ -26,9 +28,17 @@ public class Player extends Entity{
 	public Player(InputController inpCtrl, WorldData world) {
 		this.inpCtrl = inpCtrl;
 		this.world = world;
+		
+		//Set default location
 		this.x = 100;
 		this.y = 100;
-		this.speed = 4;
+		
+		//Set speed of character
+		this.defaultSpeed = 4;
+		this.speed = defaultSpeed;
+		double sine45 = 0.707;
+		this.defaultDiagonalSpeed = (int)Math.round(sine45 * defaultSpeed);
+		
 		try {
 			this.spriteSheet = new SpriteSheet("/player/player.png", world.getBaseTileSize());
 		}catch (IOException e) {
@@ -37,30 +47,36 @@ public class Player extends Entity{
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * Checks if the character is moving in a diagonal direction
+	 * @return
+	 */
+	private boolean isDiagonalDirection() {
+		return inpCtrl.upPressed && inpCtrl.leftPressed || inpCtrl.upPressed && inpCtrl.rightPressed || inpCtrl.downPressed && inpCtrl.leftPressed || inpCtrl.downPressed && inpCtrl.rightPressed;
+	}
 
 	@Override
 	public void update() {
-		//TODO: Account for diagonal speed
-		//Default to front direction if two contradictory directions are pressed simultaneously.
-		if(inpCtrl.upPressed && inpCtrl.downPressed || inpCtrl.rightPressed && inpCtrl.leftPressed) {
+		//Account for diagonal speed
+		speed = (isDiagonalDirection() ? defaultDiagonalSpeed : defaultSpeed);
+		
+		//Update direction and location of player
+		if(inpCtrl.upPressed) {
+			direction = "back";
+			y -= speed;
+		}
+		if(inpCtrl.downPressed) {
 			direction = "front";
-		}else {
-			if(inpCtrl.upPressed) {
-				direction = "back";
-				y -= speed;
-			}
-			if(inpCtrl.downPressed) {
-				direction = "front";
-				y += speed;
-			}
-			if(inpCtrl.rightPressed) {
-				direction = "right";
-				x += speed;
-			}
-			if(inpCtrl.leftPressed) {
-				direction = "left";
-				x -= speed;
-			}
+			y += speed;
+		}
+		if(inpCtrl.rightPressed) {
+			direction = "right";
+			x += speed;
+		}
+		if(inpCtrl.leftPressed) {
+			direction = "left";
+			x -= speed;
 		}
 	}
 
