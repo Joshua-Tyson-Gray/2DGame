@@ -12,8 +12,8 @@ import entity.Player;
  *
  */
 public class WorldData {
-	private final int baseTileSize = 16;
-	private final int tileScale = 3;
+	private final int baseTileSize = 32;
+	private final int tileScale = 2;
 	private final int tileSize = baseTileSize * tileScale;
 	private final int maxScreenCol = 16;
 	private final int maxScreenRow = 12;
@@ -31,7 +31,15 @@ public class WorldData {
 	}
 	
 	/**
-	 * Retrieves the tile size for the game environment.
+	 * Retrieves the size of the tile in logical pixels.
+	 * @return
+	 */
+	public int getBaseTileSize() {
+		return this.baseTileSize;
+	}
+	
+	/**
+	 * Retrieves the size of the tile after scaling to screen proportions.
 	 * @return int representing the tile size in pixels
 	 */
 	public int getTileSize() {

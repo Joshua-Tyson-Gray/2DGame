@@ -1,11 +1,14 @@
 package entity;
 
 import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 
 public abstract class Entity {
 	protected int x;
 	protected int y;
 	protected int speed;
+	
+	protected BufferedImage spriteSheet;
 	
 	/**
 	 * Updates the data of the entity.
