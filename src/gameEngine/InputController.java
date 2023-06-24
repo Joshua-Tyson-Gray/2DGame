@@ -3,8 +3,14 @@ package gameEngine;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+/**
+ * Takes care of the user input for the game.
+ * @author tyson
+ *
+ */
 public class InputController implements KeyListener {
-	//TODO: Make this a singleton?
+	//TODO: Add interface or abstract class
+	//TODO: Make this a singleton? What if I want to add a multiplayer feature?
 	
 	public boolean upPressed = false;
 	public boolean downPressed = false;

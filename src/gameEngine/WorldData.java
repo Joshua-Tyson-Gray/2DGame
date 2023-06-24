@@ -77,4 +77,12 @@ public class WorldData {
 	public void render(Graphics2D g2) {
 		player.draw(g2);
 	}
+	
+	/**
+	 * Retrieves the InputController of the world.
+	 * @return
+	 */
+	public InputController getInputController() {
+		return this.inpCtrl;
+	}
 }

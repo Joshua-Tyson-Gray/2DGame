@@ -1,14 +1,17 @@
 package entity;
 
 import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
 
+/**
+ * Represents any tangible component in the game.
+ * @author tyson
+ *
+ */
 public abstract class Entity {
 	protected int x;
 	protected int y;
 	protected int speed;
-	
-	protected BufferedImage spriteSheet;
+	protected SpriteSheet spriteSheet;
 	
 	/**
 	 * Updates the data of the entity.
