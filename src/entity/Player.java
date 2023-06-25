@@ -16,7 +16,6 @@ public class Player extends Entity{
 	
 	private InputController inpCtrl;
 	private WorldData world;
-	private String direction = "front";
 	final int defaultSpeed;
 	final int defaultDiagonalSpeed;
 	
@@ -58,33 +57,57 @@ public class Player extends Entity{
 
 	@Override
 	public void update() {
-		//TODO: Properly account for contradicting directions.
+		//TODO: Fix all the nested if statements
 		//Account for diagonal speed
 		speed = (isDiagonalDirection() ? defaultDiagonalSpeed : defaultSpeed);
+
+		if(!inpCtrl.rightPressed && !inpCtrl.leftPressed && !inpCtrl.upPressed && !inpCtrl.downPressed) {
+			if(spriteSheet.getSpriteAnimName() == "walkBack") {
+				spriteSheet.setSpriteAnim("idleBack");
+			}else if(spriteSheet.getSpriteAnimName() == "walkFront") {
+				spriteSheet.setSpriteAnim("idleFront");
+			}else if(spriteSheet.getSpriteAnimName() == "walkRight") {
+				spriteSheet.setSpriteAnim("idleRight");
+			}else if(spriteSheet.getSpriteAnimName() == "walkLeft") {
+				spriteSheet.setSpriteAnim("idleLeft");
+			}
+		}
+		//Update direction and location of players Vertical Movement
+		if(inpCtrl.upPressed ^ inpCtrl.downPressed) {
+			if(inpCtrl.upPressed) {
+				y -= speed;
+				if(!(inpCtrl.rightPressed || inpCtrl.leftPressed)) {
+					spriteSheet.setSpriteAnim("walkBack");
+				}
+			}else {
+				y += speed;
+				if(!(inpCtrl.rightPressed || inpCtrl.leftPressed)) {
+					spriteSheet.setSpriteAnim("walkFront");
+				}
+			}
+		}
+
+		//Update direction and location of players Horizontal Movement
+		if(inpCtrl.rightPressed ^ inpCtrl.leftPressed) {
+			if(inpCtrl.rightPressed) {
+				x += speed;
+				if(!(inpCtrl.upPressed || inpCtrl.downPressed)) {
+					spriteSheet.setSpriteAnim("walkRight");
+				}
+			}else {
+				x -= speed;
+				if(!(inpCtrl.upPressed || inpCtrl.downPressed)) {
+					spriteSheet.setSpriteAnim("walkLeft");
+				}
+			}
+		}
 		
-		//Update direction and location of player
-		if(inpCtrl.upPressed) {
-			direction = "back";
-			y -= speed;
-		}
-		if(inpCtrl.downPressed) {
-			direction = "front";
-			y += speed;
-		}
-		if(inpCtrl.rightPressed) {
-			direction = "right";
-			x += speed;
-		}
-		if(inpCtrl.leftPressed) {
-			direction = "left";
-			x -= speed;
-		}
+		spriteSheet.updateSpriteFrame();
 	}
 
 	@Override
 	public void draw(Graphics2D g2) {
-		BufferedImage image = spriteSheet.getSprite(direction);
+		BufferedImage image = spriteSheet.getSpriteFrame();
 		g2.drawImage(image, x, y, world.getTileSize(), world.getTileSize(), null);
-		//Do not g2.dispose()
 	}
 }

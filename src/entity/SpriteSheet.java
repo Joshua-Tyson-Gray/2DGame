@@ -1,7 +1,5 @@
 package entity;
 
-import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.HashMap;
@@ -14,10 +12,11 @@ import javax.imageio.ImageIO;
  *
  */
 public class SpriteSheet {
-	//TODO: Clarify idle sprite from walking sprites
-	
 	private BufferedImage spriteSheet;
-	private HashMap<String, BufferedImage[]> spriteSets;
+	private int spriteFrameNum;
+	private int spriteCounter;
+	private String spriteAnimName;
+	private HashMap<String, SpriteAnimation> spriteData;
 	
 	/**
 	 * Generates a SpriteSheet from the image path passed. Assumes the tiles are exact squares.
@@ -40,46 +39,66 @@ public class SpriteSheet {
 		}catch(IOException e) {
 			throw e;
 		}
+		spriteData = new HashMap<String, SpriteAnimation>();
 		
-		spriteSets = new HashMap<String, BufferedImage[]>();
-		spriteSets.put("front", new BufferedImage[] {
-				spriteSheet.getSubimage(8, 4, tileSizeX, tileSizeY)
-		});
-		spriteSets.put("back", new BufferedImage[] {
-				spriteSheet.getSubimage(72, 4, tileSizeX, tileSizeY)
-		});
-		spriteSets.put("right", new BufferedImage[] {
-				flipSpriteHorizontally(spriteSheet.getSubimage(42, 4, tileSizeX, tileSizeY))
-		});
-		spriteSets.put("left", new BufferedImage[] {
-				spriteSheet.getSubimage(42, 4, tileSizeX, tileSizeY)
-		});
+		//Idle Animations
+		spriteData.put("idleFront", new SpriteAnimation(spriteSheet, 8, 4, 1, tileSizeX, tileSizeY, false));
+		spriteData.put("idleBack", new SpriteAnimation(spriteSheet, 72, 4, 1, tileSizeX, tileSizeY, false));
+		spriteData.put("idleRight", new SpriteAnimation(spriteSheet, 42, 4, 1, tileSizeX, tileSizeY, true));
+		spriteData.put("idleLeft", new SpriteAnimation(spriteSheet, 42, 4, 1, tileSizeX, tileSizeY, false));
+		
+		//Walk Animations
+		spriteData.put("walkFront", new SpriteAnimation(spriteSheet, 8, 72, 10, tileSizeX, tileSizeY, false));
+		spriteData.put("walkBack", new SpriteAnimation(spriteSheet, 675, 72, 10, tileSizeX, tileSizeY, false));
+		spriteData.put("walkRight", new SpriteAnimation(spriteSheet, 344, 72, 10, tileSizeX, tileSizeY, true));
+		spriteData.put("walkLeft", new SpriteAnimation(spriteSheet, 344, 72, 10, tileSizeX, tileSizeY, false));
+		
+		this.spriteAnimName = "walkFront";
+		this.spriteFrameNum = 0;
 	}
 	
 	/**
-	 * Flips the sprite's image in the horizontal direction
-	 * @param img The image to flip
-	 * @return A BufferedImage of the flipped sprite.
+	 * Sets the Sprite Animation based on the name of the animation passed.
+	 * @param spriteName The animation to set
 	 */
-	private BufferedImage flipSpriteHorizontally(BufferedImage img) {
-		AffineTransform at = new AffineTransform();
-		at.concatenate(AffineTransform.getScaleInstance(-1, 1));
-		at.concatenate(AffineTransform.getTranslateInstance(-img.getWidth(), 0));
-		BufferedImage flippedSprite = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_ARGB);
-		Graphics2D g = flippedSprite.createGraphics();
-		g.transform(at);
-		g.drawImage(img, 0, 0, null);
-		g.dispose();
-		return flippedSprite;
+	public void setSpriteAnim(String spriteName) {
+		//TODO: Error handle if the spriteName is not an available animation
+		//Only reset the spriteFrame number if the spriteName changed
+		this.spriteFrameNum = (this.spriteAnimName == spriteName ? this.spriteFrameNum: 0);
+		this.spriteAnimName = spriteName;
 	}
 	
 	/**
-	 * Obtains the sprite of the corresponding key that is passed.
+	 * Gets the name of the current animation
+	 * @return
+	 */
+	public String getSpriteAnimName() {
+		return this.spriteAnimName;
+	}
+	
+	/**
+	 * Updates the sprite frame if the appropriate time has passed.Should be run every frame in each second.
+	 */
+	public void updateSpriteFrame() {
+		spriteCounter++;
+		//TODO: Get the counter in the SpriteAnimation class
+		//TODO: Dynamically determine the time
+		if(spriteCounter > 5) {
+			if(spriteFrameNum + 1 == spriteData.get(spriteAnimName).getNumFrames()) {
+				spriteFrameNum = 0;
+			}else {
+				spriteFrameNum += 1;
+			}
+			spriteCounter = 0;
+		}
+	}
+	
+	/**
+	 * Obtains the sprite of the current sprite animation.
 	 * @param key The key or name of the sprite to retrieve
 	 * @return BufferedImage of the sprite corresponding to the key
 	 */
-	public BufferedImage getSprite(String key) {
-		//TODO: Account for animation
-		return spriteSets.get(key)[0];
+	public BufferedImage getSpriteFrame() {
+		return spriteData.get(spriteAnimName).getSpriteFrame(spriteFrameNum);
 	}
 }
