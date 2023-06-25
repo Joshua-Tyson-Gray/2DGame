@@ -83,7 +83,7 @@ public class SpriteSheet {
 		spriteCounter++;
 		//TODO: Get the counter in the SpriteAnimation class
 		//TODO: Dynamically determine the time
-		if(spriteCounter > 5) {
+		if(spriteCounter > 4) {
 			if(spriteFrameNum + 1 == spriteData.get(spriteAnimName).getNumFrames()) {
 				spriteFrameNum = 0;
 			}else {

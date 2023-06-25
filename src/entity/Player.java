@@ -33,7 +33,7 @@ public class Player extends Entity{
 		this.y = 100;
 		
 		//Set speed of character
-		this.defaultSpeed = 4;
+		this.defaultSpeed = 3;
 		this.speed = defaultSpeed;
 		double sine45 = 0.707;
 		this.defaultDiagonalSpeed = (int)Math.round(sine45 * defaultSpeed);
