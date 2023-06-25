@@ -15,6 +15,8 @@ public class SpriteSheet {
 	private BufferedImage spriteSheet;
 	private String spriteAnimName;
 	private HashMap<String, SpriteAnimation> spriteData;
+	public static final String WALK = "walk";
+	public static final String IDLE = "idle";
 	
 	/**
 	 * Generates a SpriteSheet from the image path passed. Assumes the tiles are exact squares.
@@ -42,18 +44,18 @@ public class SpriteSheet {
 		spriteData = new HashMap<String, SpriteAnimation>();
 		
 		//Idle Animations
-		spriteData.put("idleFront", new SpriteAnimation(spriteSheet, 8, 4, 1, tileSizeX, tileSizeY, false, 666, FPS));
-		spriteData.put("idleBack", new SpriteAnimation(spriteSheet, 72, 4, 1, tileSizeX, tileSizeY, false, 666, FPS));
-		spriteData.put("idleRight", new SpriteAnimation(spriteSheet, 42, 4, 1, tileSizeX, tileSizeY, true, 666, FPS));
-		spriteData.put("idleLeft", new SpriteAnimation(spriteSheet, 42, 4, 1, tileSizeX, tileSizeY, false, 666, FPS));
+		spriteData.put("idleSouth", new SpriteAnimation(spriteSheet, 8, 4, 1, tileSizeX, tileSizeY, false, 400, FPS));
+		spriteData.put("idleNorth", new SpriteAnimation(spriteSheet, 72, 4, 1, tileSizeX, tileSizeY, false, 400, FPS));
+		spriteData.put("idleEast", new SpriteAnimation(spriteSheet, 42, 4, 1, tileSizeX, tileSizeY, true, 400, FPS));
+		spriteData.put("idleWest", new SpriteAnimation(spriteSheet, 42, 4, 1, tileSizeX, tileSizeY, false, 400, FPS));
 		
 		//Walk Animations
-		spriteData.put("walkFront", new SpriteAnimation(spriteSheet, 8, 72, 10, tileSizeX, tileSizeY, false, 666, FPS));
-		spriteData.put("walkBack", new SpriteAnimation(spriteSheet, 675, 72, 10, tileSizeX, tileSizeY, false, 666, FPS));
-		spriteData.put("walkRight", new SpriteAnimation(spriteSheet, 344, 72, 10, tileSizeX, tileSizeY, true, 666, FPS));
-		spriteData.put("walkLeft", new SpriteAnimation(spriteSheet, 344, 72, 10, tileSizeX, tileSizeY, false, 666, FPS));
+		spriteData.put("walkSouth", new SpriteAnimation(spriteSheet, 8, 72, 10, tileSizeX, tileSizeY, false, 400, FPS));
+		spriteData.put("walkNorth", new SpriteAnimation(spriteSheet, 675, 72, 10, tileSizeX, tileSizeY, false, 400, FPS));
+		spriteData.put("walkEast", new SpriteAnimation(spriteSheet, 344, 72, 10, tileSizeX, tileSizeY, true, 400, FPS));
+		spriteData.put("walkWest", new SpriteAnimation(spriteSheet, 344, 72, 10, tileSizeX, tileSizeY, false, 400, FPS));
 		
-		this.spriteAnimName = "walkFront";
+		this.spriteAnimName = "idleSouth";
 		spriteData.get(spriteAnimName).resetAnim();
 	}
 	
@@ -68,7 +70,7 @@ public class SpriteSheet {
 			return;
 		}
 		//Only reset the spriteFrame number if the spriteName changed
-		if(this.spriteAnimName != spriteName) {
+		if(!this.spriteAnimName.equals(spriteName)) {
 			this.spriteData.get(spriteAnimName).resetAnim();
 		}
 		this.spriteAnimName = spriteName;

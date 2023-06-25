@@ -18,6 +18,13 @@ public class Player extends Entity{
 	private WorldData world;
 	final int defaultSpeed;
 	final int defaultDiagonalSpeed;
+	private String animationDirection;
+	private String animationType;
+	
+	public static final String NORTH = "North";
+	public static final String EAST = "East";
+	public static final String SOUTH = "South";
+	public static final String WEST = "West";
 	
 	/**
 	 * Constructor for the Player entity.
@@ -32,8 +39,11 @@ public class Player extends Entity{
 		this.x = 100;
 		this.y = 100;
 		
+		this.animationDirection = Player.SOUTH;
+		this.animationType = SpriteSheet.IDLE;
+		
 		//Set speed of character
-		this.defaultSpeed = 3;
+		this.defaultSpeed = 6;
 		this.speed = defaultSpeed;
 		double sine45 = 0.707;
 		this.defaultDiagonalSpeed = (int)Math.round(sine45 * defaultSpeed);
@@ -57,50 +67,116 @@ public class Player extends Entity{
 
 	@Override
 	public void update() {
-		//TODO: Fix all the nested if statements
+		//TODO: There's got to be a more efficient way to calculate all this dynamically
 		//Account for diagonal speed
 		speed = (isDiagonalDirection() ? defaultDiagonalSpeed : defaultSpeed);
-
+		
+		//Determine Animation Type
 		if(!inpCtrl.rightPressed && !inpCtrl.leftPressed && !inpCtrl.upPressed && !inpCtrl.downPressed) {
-			if(spriteSheet.getSpriteAnimName() == "walkBack") {
-				spriteSheet.setSpriteAnim("idleBack");
-			}else if(spriteSheet.getSpriteAnimName() == "walkFront") {
-				spriteSheet.setSpriteAnim("idleFront");
-			}else if(spriteSheet.getSpriteAnimName() == "walkRight") {
-				spriteSheet.setSpriteAnim("idleRight");
-			}else if(spriteSheet.getSpriteAnimName() == "walkLeft") {
-				spriteSheet.setSpriteAnim("idleLeft");
-			}
+			animationType = SpriteSheet.IDLE;
+		}else if((inpCtrl.rightPressed ^ inpCtrl.leftPressed) || (inpCtrl.upPressed ^ inpCtrl.downPressed)) {
+			animationType = SpriteSheet.WALK;
+		}else {
+			animationType = SpriteSheet.IDLE;
 		}
-		//Update direction and location of players Vertical Movement
-		if(inpCtrl.upPressed ^ inpCtrl.downPressed) {
-			if(inpCtrl.upPressed) {
-				y -= speed;
-				if(!(inpCtrl.rightPressed || inpCtrl.leftPressed)) {
-					spriteSheet.setSpriteAnim("walkBack");
-				}
-			}else {
-				y += speed;
-				if(!(inpCtrl.rightPressed || inpCtrl.leftPressed)) {
-					spriteSheet.setSpriteAnim("walkFront");
-				}
-			}
+		
+		//Determine Animation Direction
+		if(inpCtrl.rightPressed && inpCtrl.upPressed && (animationDirection != Player.NORTH || animationDirection != Player.EAST)) {
+			animationDirection = Player.NORTH;
+		}else if(inpCtrl.leftPressed && inpCtrl.upPressed && (animationDirection != Player.NORTH || animationDirection != Player.WEST)) {
+			animationDirection = Player.NORTH;
+		}else if(inpCtrl.leftPressed && inpCtrl.downPressed && (animationDirection != Player.SOUTH || animationDirection != Player.WEST)) {
+			animationDirection = Player.SOUTH;
+		}else if(inpCtrl.rightPressed && inpCtrl.downPressed && (animationDirection != Player.SOUTH || animationDirection != Player.EAST)) {
+			animationDirection = Player.SOUTH;
+		}else if(inpCtrl.upPressed){
+			animationDirection = Player.NORTH;
+		}else if(inpCtrl.downPressed){
+			animationDirection = Player.SOUTH;
+		}else if(inpCtrl.rightPressed){
+			animationDirection = Player.EAST;
+		}else if(inpCtrl.leftPressed){
+			animationDirection = Player.WEST;
 		}
+		
+		//Update location
+		if(inpCtrl.upPressed) {
+			y -= speed;
+		}
+		if(inpCtrl.downPressed) {
+			y += speed;
+		}
+		if(inpCtrl.leftPressed) {
+			x -= speed;
+		}
+		if(inpCtrl.rightPressed) {
+			x += speed;
+		}
+		
+		spriteSheet.setSpriteAnim(animationType + animationDirection);
+		
+		
+//		if(!inpCtrl.rightPressed && !inpCtrl.leftPressed && !inpCtrl.upPressed && !inpCtrl.downPressed) {
+//			switch(direction) {
+//			case Player.NORTH:
+//				spriteSheet.setSpriteAnim("idleBack");
+//				break;
+//			case Player.EAST:
+//				spriteSheet.setSpriteAnim("idleRight");
+//				break;
+//			case Player.SOUTH:
+//				spriteSheet.setSpriteAnim("idleFront");
+//				break;
+//			case Player.WEST:
+//				spriteSheet.setSpriteAnim("idleLeft");
+//				break;
+//			}
+//		}
 
-		//Update direction and location of players Horizontal Movement
-		if(inpCtrl.rightPressed ^ inpCtrl.leftPressed) {
-			if(inpCtrl.rightPressed) {
-				x += speed;
-				if(!(inpCtrl.upPressed || inpCtrl.downPressed)) {
-					spriteSheet.setSpriteAnim("walkRight");
-				}
-			}else {
-				x -= speed;
-				if(!(inpCtrl.upPressed || inpCtrl.downPressed)) {
-					spriteSheet.setSpriteAnim("walkLeft");
-				}
-			}
-		}
+//		if(!inpCtrl.rightPressed && !inpCtrl.leftPressed && !inpCtrl.upPressed && !inpCtrl.downPressed) {
+//			if(spriteSheet.getSpriteAnimName() == "walkBack") {
+//				spriteSheet.setSpriteAnim("idleBack");
+//			}else if(spriteSheet.getSpriteAnimName() == "walkFront") {
+//				spriteSheet.setSpriteAnim("idleFront");
+//			}else if(spriteSheet.getSpriteAnimName() == "walkRight") {
+//				spriteSheet.setSpriteAnim("idleRight");
+//			}else if(spriteSheet.getSpriteAnimName() == "walkLeft") {
+//				spriteSheet.setSpriteAnim("idleLeft");
+//			}
+//		}
+		//Update direction and location of players Vertical Movement
+//		if(inpCtrl.upPressed ^ inpCtrl.downPressed) {
+//			if(inpCtrl.upPressed) {
+//				y -= speed;
+//				if(!(inpCtrl.rightPressed || inpCtrl.leftPressed)) {
+//					spriteSheet.setSpriteAnim("walkBack");
+//					direction = Player.NORTH;
+//				}
+//			}else {
+//				y += speed;
+//				if(!(inpCtrl.rightPressed || inpCtrl.leftPressed)) {
+//					spriteSheet.setSpriteAnim("walkFront");
+//					direction = Player.SOUTH;
+//				}
+//			}
+//		}
+//
+//		//Update direction and location of players Horizontal Movement
+//		if(inpCtrl.rightPressed ^ inpCtrl.leftPressed) {
+//			if(inpCtrl.rightPressed) {
+//				x += speed;
+//				if(!(inpCtrl.upPressed || inpCtrl.downPressed)) {
+//					spriteSheet.setSpriteAnim("walkRight");
+//					direction = Player.EAST;
+//				}
+//			}else {
+//				x -= speed;
+//				if(!(inpCtrl.upPressed || inpCtrl.downPressed)) {
+//					spriteSheet.setSpriteAnim("walkLeft");
+//					direction = Player.WEST;
+//				}
+//			}
+//		}
 		
 		spriteSheet.updateSpriteFrame();
 	}
