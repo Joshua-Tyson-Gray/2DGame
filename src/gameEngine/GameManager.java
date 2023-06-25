@@ -24,7 +24,7 @@ public class GameManager extends JPanel implements Runnable{
 	
 	public GameManager(WorldData world, int FPS){
 		this.world = world;
-		this.FPS = FPS;
+		this.FPS = world.getFPS();
 		//TODO: It would be better to determine the screen size first and use that to dictate how large the tiles will be instead.
 		screenWidth = world.getTileSize() * world.getMaxScreenCol();
 		screenHeight = world.getTileSize() * world.getMaxScreenRow();

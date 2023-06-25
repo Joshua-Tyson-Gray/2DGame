@@ -39,7 +39,7 @@ public class Player extends Entity{
 		this.defaultDiagonalSpeed = (int)Math.round(sine45 * defaultSpeed);
 		
 		try {
-			this.spriteSheet = new SpriteSheet("/player/player.png", world.getBaseTileSize());
+			this.spriteSheet = new SpriteSheet("/player/player.png", world.getBaseTileSize(), world.getFPS());
 		}catch (IOException e) {
 			//TODO: Log instead of printing to screen
 			System.out.println("Sprite Sheet could not be loaded.");

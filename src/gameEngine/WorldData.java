@@ -17,6 +17,7 @@ public class WorldData {
 	private final int tileSize = baseTileSize * tileScale;
 	private final int maxScreenCol = 16;
 	private final int maxScreenRow = 12;
+	private final int FPS = 60;
 	
 	private InputController inpCtrl;
 	private Player player;
@@ -28,6 +29,14 @@ public class WorldData {
 	public WorldData(InputController inpCtrl) {
 		this.inpCtrl = inpCtrl;
 		this.player = new Player(inpCtrl, this);
+	}
+	
+	/**
+	 * Gets the frame rate for the game loop.
+	 * @return frame rate
+	 */
+	public int getFPS() {
+		return FPS;
 	}
 	
 	/**

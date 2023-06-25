@@ -15,6 +15,9 @@ public class SpriteAnimation {
 	private int width, height;
 	private int numFrames;
 	private boolean shouldFlip;
+	private int frameInterval;
+	private int currentFrame;
+	private int updateCounter;
 	
 	private BufferedImage spriteSheet;
 	
@@ -26,9 +29,11 @@ public class SpriteAnimation {
 	 * @param numFrames The number of frames in the animation
 	 * @param width The width of the sprite tiles in pixels
 	 * @param height The height of the sprite tiles in pixels
-	 * @param flipHorizontally boolean indicating if each sprite tile should be flipped horizontally after retrieval
+	 * @param flipHorizontally boolean indicating if each sprite in the animation should be flipped horizontally before returning
+	 * @param speed time in milliseconds for how long it should take to complete one cycle of the animation
+	 * @param FPS frames per second determined by the game loop
 	 */
-	public SpriteAnimation(BufferedImage spriteSheet, int x, int y, int numFrames, int width, int height, boolean flipHorizontally){
+	public SpriteAnimation(BufferedImage spriteSheet, int x, int y, int numFrames, int width, int height, boolean flipHorizontally, int speed, int FPS){
 		this.x = x;
 		this.y = y;
 		this.numFrames = numFrames;
@@ -36,6 +41,31 @@ public class SpriteAnimation {
 		this.shouldFlip = flipHorizontally;
 		this.width = width;
 		this.height = height;
+		this.frameInterval = (int)Math.round((speed / 1000.0) * FPS / numFrames);
+		this.currentFrame = 0;
+		this.updateCounter = 0;
+	}
+	
+	/**
+	 * Updates the animation frame if the appropriate time has elapsed.
+	 */
+	public void update() {
+		updateCounter++;
+		if(updateCounter > frameInterval) {
+			if(currentFrame + 1 == numFrames) {
+				currentFrame = 0;
+			}else {
+				currentFrame += 1;
+			}
+			updateCounter = 0;
+		}
+	}
+	
+	/**
+	 * Resets the animation to the beginning frame.
+	 */
+	public void resetAnim() {
+		currentFrame = 0;
 	}
 	
 	/**
@@ -64,13 +94,12 @@ public class SpriteAnimation {
 	
 	/**
 	 * Gets the BufferedImage of the sprite frame in the animation based on the frame number passed.
-	 * @param frameNum index of the frame in the animation
 	 * @return BufferedImage of the sprite frame
 	 */
-	public BufferedImage getSpriteFrame(int frameNum) {
-		int frameXCoord = x + width * frameNum;
+	public BufferedImage getFrame() {
+		int frameXCoord = x + width * currentFrame;
 		BufferedImage sprite = spriteSheet.getSubimage(frameXCoord, y, width, height);
-		return (shouldFlip ? SpriteAnimation.flipSpriteHorizontally(sprite) : sprite);
+		return (shouldFlip ? SpriteAnimation.flipFrameHorizontally(sprite) : sprite);
 	}
 	
 	/**
@@ -78,7 +107,15 @@ public class SpriteAnimation {
 	 * @return true if animation exists, false otherwise
 	 */
 	public boolean hasAnimation() {
-		return !(this.numFrames == 1);
+		return !(numFrames == 1);
+	}
+	
+	/**
+	 * Gets how many frames should pass before the next sprite frame is rendered.
+	 * @return Number of frames before the next sprite image is drawn.
+	 */
+	public int getFrameInterval() {
+		return frameInterval;
 	}
 	
 	/**
@@ -86,7 +123,7 @@ public class SpriteAnimation {
 	 * @param img The image to flip
 	 * @return A BufferedImage of the flipped sprite.
 	 */
-	private static BufferedImage flipSpriteHorizontally(BufferedImage img) {
+	private static BufferedImage flipFrameHorizontally(BufferedImage img) {
 		AffineTransform at = new AffineTransform();
 		at.concatenate(AffineTransform.getScaleInstance(-1, 1));
 		at.concatenate(AffineTransform.getTranslateInstance(-img.getWidth(), 0));
