@@ -3,6 +3,7 @@ package entity;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.Properties;
 
 import gameEngine.InputController;
 import gameEngine.WorldData;
@@ -12,14 +13,12 @@ import gameEngine.WorldData;
  * @author tyson
  *
  */
-public class Player extends Entity{
+public class PlayerTopDown extends Entity{
 	
 	private InputController inpCtrl;
 	private WorldData world;
 	final int defaultSpeed;
 	final int defaultDiagonalSpeed;
-	private String animationDirection;
-	private String animationType;
 	
 	public static final String NORTH = "North";
 	public static final String EAST = "East";
@@ -31,25 +30,32 @@ public class Player extends Entity{
 	 * @param inpCtrl InputController for the player
 	 * @param world The world in which the player entity resides
 	 */
-	public Player(InputController inpCtrl, WorldData world) {
+	public PlayerTopDown(InputController inpCtrl, WorldData world, String playerPropFilePath, int xLoc, int yLoc) {
 		this.inpCtrl = inpCtrl;
 		this.world = world;
 		
-		//Set default location
-		this.x = 100;
-		this.y = 100;
+		//Load player properties
+		Properties playerProps = new Properties();
+		try{
+			playerProps.load(getClass().getResourceAsStream(playerPropFilePath));
+		}catch(IOException e) {
+			//TODO: Log to file instead of printing to screen
+			System.out.println("Player properties file could not be loaded.");
+			e.printStackTrace();
+		}
 		
-		this.animationDirection = Player.SOUTH;
-		this.animationType = SpriteSheet.IDLE;
+		//Set default location
+		this.x = xLoc;
+		this.y = yLoc;
 		
 		//Set speed of character
-		this.defaultSpeed = 6;
+		this.defaultSpeed = Integer.parseInt(playerProps.getProperty("default_speed"));
 		this.speed = defaultSpeed;
 		double sine45 = 0.707;
 		this.defaultDiagonalSpeed = (int)Math.round(sine45 * defaultSpeed);
 		
 		try {
-			this.spriteSheet = new SpriteSheet("/player/player.png", world.getBaseTileSize(), world.getFPS());
+			this.spriteSheet = new SpriteSheet(playerProps, world.getFPS());
 		}catch (IOException e) {
 			//TODO: Log instead of printing to screen
 			System.out.println("Sprite Sheet could not be loaded.");
@@ -73,30 +79,30 @@ public class Player extends Entity{
 		
 		//Determine Animation Type
 		if(!inpCtrl.rightPressed && !inpCtrl.leftPressed && !inpCtrl.upPressed && !inpCtrl.downPressed) {
-			animationType = SpriteSheet.IDLE;
+			spriteSheet.setAnimType(SpriteSheet.IDLE);
 		}else if((inpCtrl.rightPressed ^ inpCtrl.leftPressed) || (inpCtrl.upPressed ^ inpCtrl.downPressed)) {
-			animationType = SpriteSheet.WALK;
+			spriteSheet.setAnimType(SpriteSheet.WALK);
 		}else {
-			animationType = SpriteSheet.IDLE;
+			spriteSheet.setAnimType(SpriteSheet.IDLE);
 		}
 		
 		//Determine Animation Direction
-		if(inpCtrl.rightPressed && inpCtrl.upPressed && (animationDirection != Player.NORTH || animationDirection != Player.EAST)) {
-			animationDirection = Player.NORTH;
-		}else if(inpCtrl.leftPressed && inpCtrl.upPressed && (animationDirection != Player.NORTH || animationDirection != Player.WEST)) {
-			animationDirection = Player.NORTH;
-		}else if(inpCtrl.leftPressed && inpCtrl.downPressed && (animationDirection != Player.SOUTH || animationDirection != Player.WEST)) {
-			animationDirection = Player.SOUTH;
-		}else if(inpCtrl.rightPressed && inpCtrl.downPressed && (animationDirection != Player.SOUTH || animationDirection != Player.EAST)) {
-			animationDirection = Player.SOUTH;
+		if(inpCtrl.rightPressed && inpCtrl.upPressed && (spriteSheet.getAnimDirection() != PlayerTopDown.NORTH || spriteSheet.getAnimDirection() != PlayerTopDown.EAST)) {
+			spriteSheet.setAnimDirection(PlayerTopDown.NORTH);
+		}else if(inpCtrl.leftPressed && inpCtrl.upPressed && (spriteSheet.getAnimDirection() != PlayerTopDown.NORTH || spriteSheet.getAnimDirection() != PlayerTopDown.WEST)) {
+			spriteSheet.setAnimDirection(PlayerTopDown.NORTH);
+		}else if(inpCtrl.leftPressed && inpCtrl.downPressed && (spriteSheet.getAnimDirection() != PlayerTopDown.SOUTH || spriteSheet.getAnimDirection() != PlayerTopDown.WEST)) {
+			spriteSheet.setAnimDirection(PlayerTopDown.SOUTH);
+		}else if(inpCtrl.rightPressed && inpCtrl.downPressed && (spriteSheet.getAnimDirection() != PlayerTopDown.SOUTH || spriteSheet.getAnimDirection() != PlayerTopDown.EAST)) {
+			spriteSheet.setAnimDirection(PlayerTopDown.SOUTH);
 		}else if(inpCtrl.upPressed){
-			animationDirection = Player.NORTH;
+			spriteSheet.setAnimDirection(PlayerTopDown.NORTH);
 		}else if(inpCtrl.downPressed){
-			animationDirection = Player.SOUTH;
+			spriteSheet.setAnimDirection(PlayerTopDown.SOUTH);
 		}else if(inpCtrl.rightPressed){
-			animationDirection = Player.EAST;
+			spriteSheet.setAnimDirection(PlayerTopDown.EAST);
 		}else if(inpCtrl.leftPressed){
-			animationDirection = Player.WEST;
+			spriteSheet.setAnimDirection(PlayerTopDown.WEST);
 		}
 		
 		//Update location
@@ -112,8 +118,6 @@ public class Player extends Entity{
 		if(inpCtrl.rightPressed) {
 			x += speed;
 		}
-		
-		spriteSheet.setSpriteAnim(animationType + animationDirection);
 		
 		
 //		if(!inpCtrl.rightPressed && !inpCtrl.leftPressed && !inpCtrl.upPressed && !inpCtrl.downPressed) {
@@ -184,6 +188,6 @@ public class Player extends Entity{
 	@Override
 	public void draw(Graphics2D g2) {
 		BufferedImage image = spriteSheet.getSpriteFrame();
-		g2.drawImage(image, x, y, world.getTileSize(), world.getTileSize(), null);
+		g2.drawImage(image, x, y, world.getTileScale() * image.getWidth(), world.getTileScale() * image.getHeight(), null);
 	}
 }

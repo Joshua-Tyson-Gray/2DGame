@@ -2,7 +2,7 @@ package gameEngine;
 
 import java.awt.Graphics2D;
 
-import entity.Player;
+import entity.PlayerTopDown;
 
 /**
  * WorldData acts as a container for the game logic and the game data. 
@@ -20,7 +20,7 @@ public class WorldData {
 	private final int FPS = 60;
 	
 	private InputController inpCtrl;
-	private Player player;
+	private PlayerTopDown player;
 	
 	/**
 	 * Constructor for WorldData. Initializes entities and assets to their default values.
@@ -28,7 +28,15 @@ public class WorldData {
 	 */
 	public WorldData(InputController inpCtrl) {
 		this.inpCtrl = inpCtrl;
-		this.player = new Player(inpCtrl, this);
+		this.player = new PlayerTopDown(inpCtrl, this, "/player/player.properties", 100, 100);
+	}
+	
+	/**
+	 * Gets the scale of the world.
+	 * @return
+	 */
+	public int getTileScale() {
+		return tileScale;
 	}
 	
 	/**
