@@ -28,7 +28,7 @@ public class WorldData {
 	 */
 	public WorldData(InputController inpCtrl) {
 		this.inpCtrl = inpCtrl;
-		this.player = new PlayerTopDown(inpCtrl, this, "/player/player.properties", 100, 100);
+		this.player = new PlayerTopDown(inpCtrl, this, "/player/zelda.properties", 100, 100);
 	}
 	
 	/**
