@@ -14,7 +14,7 @@ import javax.imageio.ImageIO;
  */
 public class SpriteSheet {
 	private BufferedImage spriteSheet;
-	private HashMap<String, SpriteAnimation> spriteData;
+	private HashMap<String, SpriteAnimation> animationData;
 	private String animType;
 	private String animDirection;
 	public static final String WALK = "walk";
@@ -31,27 +31,45 @@ public class SpriteSheet {
 		}catch(IOException e) {
 			throw e;
 		}
-		spriteData = new HashMap<String, SpriteAnimation>();
+		animationData = new HashMap<String, SpriteAnimation>();
 		//Dynamically load animation data from properties file
 		for(String key : prop.stringPropertyNames()) {
 			if(key.substring(0, 4).equals("anim") && key.substring(key.length() - 4, key.length()).equals("name")) {
-				//TODO: Add exception handling if a particular key is not found.
 				String animName = prop.getProperty(key);
-				int x = Integer.parseInt(prop.getProperty("anim_" + animName + "_xStart"));
-				int y = Integer.parseInt(prop.getProperty("anim_" + animName + "_yStart"));;
-				int numFrames = Integer.parseInt(prop.getProperty("anim_" + animName + "_numFrames"));
-				int tileSizeX = Integer.parseInt(prop.getProperty("anim_" + animName + "_tileSizeX"));
-				int tileSizeY = Integer.parseInt(prop.getProperty("anim_" + animName + "_tileSizeY"));
-				boolean flipHorizontally = Boolean.parseBoolean(prop.getProperty("anim_" + animName + "_flipHorizontally"));
-				int speed = Integer.parseInt(prop.getProperty("anim_" + animName + "_speed"));
+				//Get property values and continue if one is missing
+				String x = prop.getProperty("anim_" + animName + "_xStart");
+				if(x == null) continue;
+				String y = prop.getProperty("anim_" + animName + "_yStart");
+				if(y == null) continue;
+				String numFrames = prop.getProperty("anim_" + animName + "_numFrames");
+				if(numFrames == null) continue;
+				String tileSizeX = prop.getProperty("anim_" + animName + "_tileSizeX");
+				if(tileSizeX == null) continue;
+				String tileSizeY = prop.getProperty("anim_" + animName + "_tileSizeY");
+				if(tileSizeY == null) continue;
+				String flipHorizontally = prop.getProperty("anim_" + animName + "_flipHorizontally");
+				if(flipHorizontally == null) continue;
+				String speed = prop.getProperty("anim_" + animName + "_speed");
+				if(speed == null) continue;
 				
-				spriteData.put(prop.getProperty(key), new SpriteAnimation(spriteSheet, x, y, numFrames, tileSizeX, tileSizeY, flipHorizontally, speed, FPS));
+				//Add the animation
+				animationData.put(prop.getProperty(key), new SpriteAnimation(
+						spriteSheet, 
+						Integer.parseInt(x), 
+						Integer.parseInt(y), 
+						Integer.parseInt(numFrames), 
+						Integer.parseInt(tileSizeX), 
+						Integer.parseInt(tileSizeY), 
+						Boolean.parseBoolean(flipHorizontally), 
+						Integer.parseInt(speed), 
+						FPS
+				));
 			}
 		}
 		
 		this.animDirection = prop.getProperty("default_start_direction");
 		this.animType = prop.getProperty("default_start_type");
-		spriteData.get(getAnimName()).resetAnim();
+		animationData.get(getAnimName()).resetAnim();
 	}
 	
 	/**
@@ -94,14 +112,14 @@ public class SpriteSheet {
 	 */
 	private void setSpriteAnim() {
 		String spriteName = animType + animDirection;
-		if(!spriteData.containsKey(spriteName)){
+		if(!animationData.containsKey(spriteName)){
 			//TODO: Log instead of printing to console
 			System.out.println("Sprite Animation " + spriteName + " was not loaded as it doesn't exist.");
 			return;
 		}
 		//Only reset the spriteFrame number if the spriteName changed
 		if(!this.getAnimName().equals(spriteName)) {
-			this.spriteData.get(getAnimName()).resetAnim();
+			this.animationData.get(getAnimName()).resetAnim();
 		}
 	}
 	
@@ -125,7 +143,7 @@ public class SpriteSheet {
 	 * Updates the sprite frame if the appropriate time has passed. Should be run every frame in each second.
 	 */
 	public void updateSpriteFrame() {
-		spriteData.get(getAnimName()).update();
+		animationData.get(getAnimName()).update();
 	}
 	
 	/**
@@ -134,6 +152,6 @@ public class SpriteSheet {
 	 * @return BufferedImage of the sprite corresponding to the key
 	 */
 	public BufferedImage getSpriteFrame() {
-		return spriteData.get(getAnimName()).getFrame();
+		return animationData.get(getAnimName()).getFrame();
 	}
 }
