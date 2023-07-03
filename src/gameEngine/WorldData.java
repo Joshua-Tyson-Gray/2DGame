@@ -1,6 +1,7 @@
 package gameEngine;
 
 import java.awt.Graphics2D;
+import java.awt.event.KeyListener;
 
 import entity.PlayerTopDown;
 
@@ -19,16 +20,14 @@ public class WorldData {
 	private final int maxScreenRow = 12;
 	private final int FPS = 60;
 	
-	private InputController inpCtrl;
 	private PlayerTopDown player;
 	
 	/**
 	 * Constructor for WorldData. Initializes entities and assets to their default values.
 	 * @param inpCtrl
 	 */
-	public WorldData(InputController inpCtrl) {
-		this.inpCtrl = inpCtrl;
-		this.player = new PlayerTopDown(inpCtrl, this, "/player/zelda.properties", 100, 100);
+	public WorldData() {
+		this.player = new PlayerTopDown(this, "/player/zelda.properties", 100, 100);
 	}
 	
 	/**
@@ -96,10 +95,10 @@ public class WorldData {
 	}
 	
 	/**
-	 * Retrieves the InputController of the world.
+	 * Retrieves the Player which implements of a KeyListener.
 	 * @return
 	 */
-	public InputController getInputController() {
-		return this.inpCtrl;
+	public KeyListener getKeyListener() {
+		return player;
 	}
 }

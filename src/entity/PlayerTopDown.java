@@ -1,11 +1,12 @@
 package entity;
 
 import java.awt.Graphics2D;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Properties;
 
-import gameEngine.InputController;
 import gameEngine.WorldData;
 
 /**
@@ -13,25 +14,21 @@ import gameEngine.WorldData;
  * @author tyson
  *
  */
-public class PlayerTopDown extends Entity{
+public class PlayerTopDown extends EntityTopDown implements KeyListener{
 	
-	private InputController inpCtrl;
-	private WorldData world;
-	final int defaultSpeed;
-	final int defaultDiagonalSpeed;
-	
-	public static final String NORTH = "North";
-	public static final String EAST = "East";
-	public static final String SOUTH = "South";
-	public static final String WEST = "West";
+	public boolean upPressed = false;
+	public boolean downPressed = false;
+	public boolean rightPressed = false;
+	public boolean leftPressed = false;
 	
 	/**
 	 * Constructor for the Player entity.
-	 * @param inpCtrl InputController for the player
 	 * @param world The world in which the player entity resides
+	 * @param playerPropFilePath properties file for the player configuration
+	 * @param xLoc The X location of the player
+	 * @param yLoc The Y location of the player
 	 */
-	public PlayerTopDown(InputController inpCtrl, WorldData world, String playerPropFilePath, int xLoc, int yLoc) {
-		this.inpCtrl = inpCtrl;
+	public PlayerTopDown(WorldData world, String playerPropFilePath, int xLoc, int yLoc) {
 		this.world = world;
 		
 		//Load player properties
@@ -45,12 +42,12 @@ public class PlayerTopDown extends Entity{
 		}
 		
 		//Set default location
-		this.x = xLoc;
-		this.y = yLoc;
+		this.xLoc = xLoc;
+		this.yLoc = yLoc;
 		
 		//Set speed of character
 		this.defaultSpeed = Integer.parseInt(playerProps.getProperty("default_speed"));
-		this.speed = defaultSpeed;
+		this.currentSpeed = defaultSpeed;
 		double sine45 = 0.707;
 		this.defaultDiagonalSpeed = (int)Math.round(sine45 * defaultSpeed);
 		
@@ -68,57 +65,56 @@ public class PlayerTopDown extends Entity{
 	 * @return
 	 */
 	private boolean isDiagonalDirection() {
-		return inpCtrl.upPressed && inpCtrl.leftPressed || inpCtrl.upPressed && inpCtrl.rightPressed || inpCtrl.downPressed && inpCtrl.leftPressed || inpCtrl.downPressed && inpCtrl.rightPressed;
+		return upPressed && leftPressed || upPressed && rightPressed || downPressed && leftPressed || downPressed && rightPressed;
 	}
 
 	@Override
 	public void update() {
 		//TODO: There's got to be a more efficient way to calculate all this dynamically
 		//Account for diagonal speed
-		speed = (isDiagonalDirection() ? defaultDiagonalSpeed : defaultSpeed);
+		currentSpeed = (isDiagonalDirection() ? defaultDiagonalSpeed : defaultSpeed);
 		
 		//Determine Animation Type
-		if(!inpCtrl.rightPressed && !inpCtrl.leftPressed && !inpCtrl.upPressed && !inpCtrl.downPressed) {
+		if(!rightPressed && !leftPressed && !upPressed && !downPressed) {
 			spriteSheet.setAnimType(SpriteSheet.IDLE);
-		}else if((inpCtrl.rightPressed ^ inpCtrl.leftPressed) || (inpCtrl.upPressed ^ inpCtrl.downPressed)) {
+		}else if((rightPressed ^ leftPressed) || (upPressed ^ downPressed)) {
 			spriteSheet.setAnimType(SpriteSheet.WALK);
 		}else {
 			spriteSheet.setAnimType(SpriteSheet.IDLE);
 		}
 		
 		//Determine Animation Direction
-		if(inpCtrl.rightPressed && inpCtrl.upPressed && (spriteSheet.getAnimDirection() != PlayerTopDown.NORTH || spriteSheet.getAnimDirection() != PlayerTopDown.EAST)) {
-			spriteSheet.setAnimDirection(PlayerTopDown.NORTH);
-		}else if(inpCtrl.leftPressed && inpCtrl.upPressed && (spriteSheet.getAnimDirection() != PlayerTopDown.NORTH || spriteSheet.getAnimDirection() != PlayerTopDown.WEST)) {
-			spriteSheet.setAnimDirection(PlayerTopDown.NORTH);
-		}else if(inpCtrl.leftPressed && inpCtrl.downPressed && (spriteSheet.getAnimDirection() != PlayerTopDown.SOUTH || spriteSheet.getAnimDirection() != PlayerTopDown.WEST)) {
-			spriteSheet.setAnimDirection(PlayerTopDown.SOUTH);
-		}else if(inpCtrl.rightPressed && inpCtrl.downPressed && (spriteSheet.getAnimDirection() != PlayerTopDown.SOUTH || spriteSheet.getAnimDirection() != PlayerTopDown.EAST)) {
-			spriteSheet.setAnimDirection(PlayerTopDown.SOUTH);
-		}else if(inpCtrl.upPressed){
-			spriteSheet.setAnimDirection(PlayerTopDown.NORTH);
-		}else if(inpCtrl.downPressed){
-			spriteSheet.setAnimDirection(PlayerTopDown.SOUTH);
-		}else if(inpCtrl.rightPressed){
-			spriteSheet.setAnimDirection(PlayerTopDown.EAST);
-		}else if(inpCtrl.leftPressed){
-			spriteSheet.setAnimDirection(PlayerTopDown.WEST);
+		if(rightPressed && upPressed && (spriteSheet.getAnimDirection() != NORTH || spriteSheet.getAnimDirection() != EAST)) {
+			spriteSheet.setAnimDirection(NORTH);
+		}else if(leftPressed && upPressed && (spriteSheet.getAnimDirection() != NORTH || spriteSheet.getAnimDirection() != WEST)) {
+			spriteSheet.setAnimDirection(NORTH);
+		}else if(leftPressed && downPressed && (spriteSheet.getAnimDirection() != SOUTH || spriteSheet.getAnimDirection() != WEST)) {
+			spriteSheet.setAnimDirection(SOUTH);
+		}else if(rightPressed && downPressed && (spriteSheet.getAnimDirection() != SOUTH || spriteSheet.getAnimDirection() != EAST)) {
+			spriteSheet.setAnimDirection(SOUTH);
+		}else if(upPressed){
+			spriteSheet.setAnimDirection(NORTH);
+		}else if(downPressed){
+			spriteSheet.setAnimDirection(SOUTH);
+		}else if(rightPressed){
+			spriteSheet.setAnimDirection(EAST);
+		}else if(leftPressed){
+			spriteSheet.setAnimDirection(WEST);
 		}
 		
 		//Update location
-		if(inpCtrl.upPressed) {
-			y -= speed;
+		if(upPressed) {
+			yLoc -= currentSpeed;
 		}
-		if(inpCtrl.downPressed) {
-			y += speed;
+		if(downPressed) {
+			yLoc += currentSpeed;
 		}
-		if(inpCtrl.leftPressed) {
-			x -= speed;
+		if(leftPressed) {
+			xLoc -= currentSpeed;
 		}
-		if(inpCtrl.rightPressed) {
-			x += speed;
+		if(rightPressed) {
+			xLoc += currentSpeed;
 		}
-		
 		
 //		if(!inpCtrl.rightPressed && !inpCtrl.leftPressed && !inpCtrl.upPressed && !inpCtrl.downPressed) {
 //			switch(direction) {
@@ -188,6 +184,49 @@ public class PlayerTopDown extends Entity{
 	@Override
 	public void draw(Graphics2D g2) {
 		BufferedImage image = spriteSheet.getSpriteFrame();
-		g2.drawImage(image, x, y, world.getTileScale() * image.getWidth(), world.getTileScale() * image.getHeight(), null);
+		g2.drawImage(image, xLoc, yLoc, world.getTileScale() * image.getWidth(), world.getTileScale() * image.getHeight(), null);
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		int keyCode = e.getKeyCode();
+		switch(keyCode) {
+			case KeyEvent.VK_W:
+				upPressed = true;
+				break;
+			case KeyEvent.VK_S:
+				downPressed = true;
+				break;
+			case KeyEvent.VK_A:
+				leftPressed = true;
+				break;
+			case KeyEvent.VK_D:
+				rightPressed = true;
+				break;
+		}		
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		int keyCode = e.getKeyCode();
+		switch(keyCode) {
+			case KeyEvent.VK_W:
+				upPressed = false;
+				break;
+			case KeyEvent.VK_S:
+				downPressed = false;
+				break;
+			case KeyEvent.VK_A:
+				leftPressed = false;
+				break;
+			case KeyEvent.VK_D:
+				rightPressed = false;
+				break;
+		}
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+		// No purpose for implementation
 	}
 }

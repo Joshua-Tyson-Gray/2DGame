@@ -32,7 +32,8 @@ public class GameManager extends JPanel implements Runnable{
 		this.setPreferredSize(new Dimension(screenWidth, screenHeight));
 		this.setBackground(Color.DARK_GRAY);
 		this.setDoubleBuffered(true);
-		this.addKeyListener(world.getInputController());
+		// Could there be multiple? In the case of multiplayer?
+		this.addKeyListener(world.getKeyListener());
 		this.setFocusable(true);
 	}
 	
@@ -80,7 +81,7 @@ public class GameManager extends JPanel implements Runnable{
 		window.setResizable(false);
 		window.setTitle("2D Game");
 		int FPS = 60;
-		GameManager gm = new GameManager(new WorldData(new InputController()), FPS);
+		GameManager gm = new GameManager(new WorldData(), FPS);
 		
 		window.add(gm);
 		gm.startGame();
