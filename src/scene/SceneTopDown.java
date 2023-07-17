@@ -29,7 +29,6 @@ public class SceneTopDown implements KeyListener{
 	private PlayerTopDown player;
 	private Map map;
 
-	
 	/**
 	 * Constructor for WorldData. Initializes entities and assets to their default values.
 	 * @param inpCtrl
@@ -71,9 +70,9 @@ public class SceneTopDown implements KeyListener{
 		}
 		
 		if(isPlayerLocked) {
-			player.updateLoc(deltaX, deltaY);
-		}else {
 			map.updatePosition(-deltaX, -deltaY);
+		}else {
+			player.updateLoc(deltaX, deltaY);
 		}
 		
 		map.update();
