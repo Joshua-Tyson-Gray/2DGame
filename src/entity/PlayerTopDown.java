@@ -1,35 +1,30 @@
 package entity;
 
 import java.awt.Graphics2D;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Properties;
 
-import gameEngine.WorldData;
+import gameEngine.GameManager;
+import scene.SceneTopDown;
 
 /**
  * Player contains the data and functions necessary for the player entity.
  * @author tyson
  *
  */
-public class PlayerTopDown extends EntityTopDown implements KeyListener{
-	
-	public boolean upPressed = false;
-	public boolean downPressed = false;
-	public boolean rightPressed = false;
-	public boolean leftPressed = false;
+public class PlayerTopDown extends EntityTopDown{
 	
 	/**
 	 * Constructor for the Player entity.
-	 * @param world The world in which the player entity resides
+	 * @param scene The world in which the player entity resides
 	 * @param playerPropFilePath properties file for the player configuration
 	 * @param xLoc The X location of the player
 	 * @param yLoc The Y location of the player
+	 * @param playerLocked indicated if the players position is locked in place at the coordinates provided
 	 */
-	public PlayerTopDown(WorldData world, String playerPropFilePath, int xLoc, int yLoc) {
-		this.world = world;
+	public PlayerTopDown(SceneTopDown scene, String playerPropFilePath, int xLoc, int yLoc) {
+		this.scene = scene;
 		
 		//Load player properties
 		Properties playerProps = new Properties();
@@ -52,7 +47,7 @@ public class PlayerTopDown extends EntityTopDown implements KeyListener{
 		this.defaultDiagonalSpeed = (int)Math.round(sine45 * defaultSpeed);
 		
 		try {
-			this.spriteSheet = new SpriteSheet(playerProps, world.getFPS());
+			this.spriteSheet = new SpriteSheet(playerProps, GameManager.getInstance().getFPS());
 		}catch (IOException e) {
 			//TODO: Log instead of printing to screen
 			System.out.println("Sprite Sheet could not be loaded.");
@@ -61,60 +56,72 @@ public class PlayerTopDown extends EntityTopDown implements KeyListener{
 	}
 	
 	/**
-	 * Checks if the character is moving in a diagonal direction
-	 * @return
+	 * Gets the current speed of the player.
+	 * @return speed of the player
 	 */
-	private boolean isDiagonalDirection() {
-		return upPressed && leftPressed || upPressed && rightPressed || downPressed && leftPressed || downPressed && rightPressed;
+	public int getCurrentSpeed() {
+		return currentSpeed;
+	}
+	
+	/**
+	 * Updates the x and y location of the player's position.
+	 * @param deltaX the change in the x direction
+	 * @param deltaY the change in the y direction
+	 */
+	public void updateLoc(int deltaX, int deltaY) {
+		yLoc += deltaY;
+		xLoc += deltaX;
 	}
 
 	@Override
 	public void update() {
 		//TODO: There's got to be a more efficient way to calculate all this dynamically
 		//Account for diagonal speed
-		currentSpeed = (isDiagonalDirection() ? defaultDiagonalSpeed : defaultSpeed);
+		currentSpeed = (scene.isDiagonalDirection() ? defaultDiagonalSpeed : defaultSpeed);
 		
 		//Determine Animation Type
-		if(!rightPressed && !leftPressed && !upPressed && !downPressed) {
+		if(!scene.rightPressed && !scene.leftPressed && !scene.upPressed && !scene.downPressed) {
 			spriteSheet.setAnimType(SpriteSheet.IDLE);
-		}else if((rightPressed ^ leftPressed) || (upPressed ^ downPressed)) {
+		}else if((scene.rightPressed ^ scene.leftPressed) || (scene.upPressed ^ scene.downPressed)) {
 			spriteSheet.setAnimType(SpriteSheet.WALK);
 		}else {
 			spriteSheet.setAnimType(SpriteSheet.IDLE);
 		}
 		
 		//Determine Animation Direction
-		if(rightPressed && upPressed && (spriteSheet.getAnimDirection() != NORTH || spriteSheet.getAnimDirection() != EAST)) {
+		if(scene.rightPressed && scene.upPressed && (spriteSheet.getAnimDirection() != NORTH || spriteSheet.getAnimDirection() != EAST)) {
 			spriteSheet.setAnimDirection(NORTH);
-		}else if(leftPressed && upPressed && (spriteSheet.getAnimDirection() != NORTH || spriteSheet.getAnimDirection() != WEST)) {
+		}else if(scene.leftPressed && scene.upPressed && (spriteSheet.getAnimDirection() != NORTH || spriteSheet.getAnimDirection() != WEST)) {
 			spriteSheet.setAnimDirection(NORTH);
-		}else if(leftPressed && downPressed && (spriteSheet.getAnimDirection() != SOUTH || spriteSheet.getAnimDirection() != WEST)) {
+		}else if(scene.leftPressed && scene.downPressed && (spriteSheet.getAnimDirection() != SOUTH || spriteSheet.getAnimDirection() != WEST)) {
 			spriteSheet.setAnimDirection(SOUTH);
-		}else if(rightPressed && downPressed && (spriteSheet.getAnimDirection() != SOUTH || spriteSheet.getAnimDirection() != EAST)) {
+		}else if(scene.rightPressed && scene.downPressed && (spriteSheet.getAnimDirection() != SOUTH || spriteSheet.getAnimDirection() != EAST)) {
 			spriteSheet.setAnimDirection(SOUTH);
-		}else if(upPressed){
+		}else if(scene.upPressed){
 			spriteSheet.setAnimDirection(NORTH);
-		}else if(downPressed){
+		}else if(scene.downPressed){
 			spriteSheet.setAnimDirection(SOUTH);
-		}else if(rightPressed){
+		}else if(scene.rightPressed){
 			spriteSheet.setAnimDirection(EAST);
-		}else if(leftPressed){
+		}else if(scene.leftPressed){
 			spriteSheet.setAnimDirection(WEST);
 		}
 		
-		//Update location
-		if(upPressed) {
-			yLoc -= currentSpeed;
-		}
-		if(downPressed) {
-			yLoc += currentSpeed;
-		}
-		if(leftPressed) {
-			xLoc -= currentSpeed;
-		}
-		if(rightPressed) {
-			xLoc += currentSpeed;
-		}
+//		if(!scene.isPlayerLocked()) {
+//			//Update location
+//			if(scene.upPressed) {
+//				yLoc -= currentSpeed;
+//			}
+//			if(scene.downPressed) {
+//				yLoc += currentSpeed;
+//			}
+//			if(scene.leftPressed) {
+//				xLoc -= currentSpeed;
+//			}
+//			if(scene.rightPressed) {
+//				xLoc += currentSpeed;
+//			}
+//		}
 		
 //		if(!inpCtrl.rightPressed && !inpCtrl.leftPressed && !inpCtrl.upPressed && !inpCtrl.downPressed) {
 //			switch(direction) {
@@ -182,51 +189,8 @@ public class PlayerTopDown extends EntityTopDown implements KeyListener{
 	}
 
 	@Override
-	public void draw(Graphics2D g2) {
+	public void render(Graphics2D g2) {
 		BufferedImage image = spriteSheet.getSpriteFrame();
-		g2.drawImage(image, xLoc, yLoc, world.getTileScale() * image.getWidth(), world.getTileScale() * image.getHeight(), null);
-	}
-
-	@Override
-	public void keyPressed(KeyEvent e) {
-		int keyCode = e.getKeyCode();
-		switch(keyCode) {
-			case KeyEvent.VK_W:
-				upPressed = true;
-				break;
-			case KeyEvent.VK_S:
-				downPressed = true;
-				break;
-			case KeyEvent.VK_A:
-				leftPressed = true;
-				break;
-			case KeyEvent.VK_D:
-				rightPressed = true;
-				break;
-		}		
-	}
-
-	@Override
-	public void keyReleased(KeyEvent e) {
-		int keyCode = e.getKeyCode();
-		switch(keyCode) {
-			case KeyEvent.VK_W:
-				upPressed = false;
-				break;
-			case KeyEvent.VK_S:
-				downPressed = false;
-				break;
-			case KeyEvent.VK_A:
-				leftPressed = false;
-				break;
-			case KeyEvent.VK_D:
-				rightPressed = false;
-				break;
-		}
-	}
-
-	@Override
-	public void keyTyped(KeyEvent e) {
-		// No purpose for implementation
+		g2.drawImage(image, xLoc, yLoc, scene.getScale() * image.getWidth(), scene.getScale() * image.getHeight(), null);
 	}
 }
