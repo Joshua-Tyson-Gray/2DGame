@@ -20,7 +20,6 @@ public class SceneTopDown implements KeyListener{
 	//TODO: Make Scenes dynamic by loaded from a properties file
 	//TODO: Improve performance by only rendering that part of the image that is displayed
 	private final int scale = 2;
-	private boolean isPlayerLocked = true;
 	public boolean upPressed = false;
 	public boolean downPressed = false;
 	public boolean rightPressed = false;
@@ -35,7 +34,7 @@ public class SceneTopDown implements KeyListener{
 	 */
 	public SceneTopDown() {
 		GameManager gm = GameManager.getInstance();
-		this.player = new PlayerTopDown(this, "/player/zelda.properties", gm.getWindowWidth() / 2, gm.getWindwoHeight() / 2);
+		this.player = new PlayerTopDown(this, "/player/zelda.properties", gm.getWindowWidth() / 2, gm.getWindowHeight() / 2);
 		this.map = new Map(this, 0, 0, "/maps/castle.png");
 	}
 	
@@ -55,6 +54,8 @@ public class SceneTopDown implements KeyListener{
 		int deltaY = 0;
 		int deltaX = 0;
 		
+		
+		
 		//Update location
 		if(upPressed) {
 			deltaY -= playerSpeed;
@@ -68,11 +69,20 @@ public class SceneTopDown implements KeyListener{
 		if(rightPressed) {
 			deltaX += playerSpeed;
 		}
-		
-		if(isPlayerLocked) {
-			map.updatePosition(-deltaX, -deltaY);
+
+		//Check if the bounds of the map are hit
+		//TODO: Account for recentering the player
+		int mapX = map.getXPos();
+		int mapY = map.getYPos();
+		if(deltaX < 0 && mapX - deltaX < 0 || deltaX > 0 && mapX + map.getMapWidth() - deltaX > GameManager.getInstance().getWindowWidth()){
+			map.updateXPos(-deltaX);
 		}else {
-			player.updateLoc(deltaX, deltaY);
+			player.updateXPos(deltaX);
+		}
+		if(deltaY < 0 && mapY - deltaY < 0 || deltaY > 0 && mapY + map.getMapHeight() - deltaY > GameManager.getInstance().getWindowHeight()) {
+			map.updateYPos(-deltaY);
+		}else {
+			player.updateYPos(deltaY);
 		}
 		
 		map.update();

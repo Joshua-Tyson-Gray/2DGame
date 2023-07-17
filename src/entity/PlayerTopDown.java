@@ -37,8 +37,8 @@ public class PlayerTopDown extends EntityTopDown{
 		}
 		
 		//Set default location
-		this.xLoc = xLoc;
-		this.yLoc = yLoc;
+		this.xPos = xLoc;
+		this.yPos = yLoc;
 		
 		//Set speed of character
 		this.defaultSpeed = Integer.parseInt(playerProps.getProperty("default_speed"));
@@ -53,24 +53,6 @@ public class PlayerTopDown extends EntityTopDown{
 			System.out.println("Sprite Sheet could not be loaded.");
 			e.printStackTrace();
 		}
-	}
-	
-	/**
-	 * Gets the current speed of the player.
-	 * @return speed of the player
-	 */
-	public int getCurrentSpeed() {
-		return currentSpeed;
-	}
-	
-	/**
-	 * Updates the x and y location of the player's position.
-	 * @param deltaX the change in the x direction
-	 * @param deltaY the change in the y direction
-	 */
-	public void updateLoc(int deltaX, int deltaY) {
-		yLoc += deltaY;
-		xLoc += deltaX;
 	}
 
 	@Override
@@ -191,6 +173,6 @@ public class PlayerTopDown extends EntityTopDown{
 	@Override
 	public void render(Graphics2D g2) {
 		BufferedImage image = spriteSheet.getSpriteFrame();
-		g2.drawImage(image, xLoc, yLoc, scene.getScale() * image.getWidth(), scene.getScale() * image.getHeight(), null);
+		g2.drawImage(image, xPos, yPos, scene.getScale() * image.getWidth(), scene.getScale() * image.getHeight(), null);
 	}
 }

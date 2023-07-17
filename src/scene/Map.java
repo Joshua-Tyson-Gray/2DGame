@@ -7,6 +7,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import entity.Entity;
+import gameEngine.GameManager;
 
 /**
  * Represents the base of a level or scene. It constitutes the background and manages any data associated with it.
@@ -44,9 +45,57 @@ public class Map extends Entity{
 	 * @param deltaX change in x direction
 	 * @param deltaY change in y direction
 	 */
-	public void updatePosition(int deltaX, int deltaY) {
+	public void updatePos(int deltaX, int deltaY) {
 		xPos += deltaX;
 		yPos += deltaY;
+	}
+	
+	/**
+	 * Updates the x position of the map.
+	 * @param deltaX change in x direction
+	 */
+	public void updateXPos(int deltaX) {
+		xPos += deltaX;
+	}
+	
+	/**
+	 * Updates the y position of the map.
+	 * @param deltaY change in y direction
+	 */
+	public void updateYPos(int deltaY) {
+		yPos += deltaY;
+	}
+	
+	/**
+	 * Gets the x coordinate of the background that corresponds to the upper left hand corner of the image.
+	 * @return x coordinate
+	 */
+	public int getXPos() {
+		return xPos;
+	}
+	
+	/**
+	 * Gets the y coordinate of the background that corresponds to the upper left hand corner of the image.
+	 * @return y coordinate
+	 */
+	public int getYPos() {
+		return yPos;
+	}
+	
+	/**
+	 * Gets the width of the map image. The number returned is the number of pixels after scaling.
+	 * @return width of the map image
+	 */
+	public int getMapWidth() {
+		return map.getWidth() * scene.getScale();
+	}
+	
+	/**
+	 * Gets the height of the map image. The number returned is the number of pixels after scaling.
+	 * @return height of the map image
+	 */
+	public int getMapHeight() {
+		return map.getHeight() * scene.getScale();
 	}
 
 	@Override

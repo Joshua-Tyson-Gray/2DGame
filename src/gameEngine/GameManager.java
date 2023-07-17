@@ -61,7 +61,7 @@ public class GameManager extends JPanel implements Runnable{
 	 * Gets the height of the window.
 	 * @return height of the window
 	 */
-	public int getWindwoHeight() {
+	public int getWindowHeight() {
 		return windowHeight;
 	}
 	
