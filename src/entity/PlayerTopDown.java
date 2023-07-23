@@ -157,6 +157,8 @@ public class PlayerTopDown extends EntityTopDown{
 	@Override
 	public void render(Graphics2D g2) {
 		BufferedImage image = spriteSheet.getSpriteFrame();
-		g2.drawImage(image, xPos, yPos, scene.getScale() * image.getWidth(), scene.getScale() * image.getHeight(), null);
+		int exactXPos = xPos - ( (image.getWidth() * scene.getScale()) / 2 );
+		int exactYPos = yPos - ( (image.getHeight() * scene.getScale()) / 2 );
+		g2.drawImage(image, exactXPos, exactYPos, scene.getScale() * image.getWidth(), scene.getScale() * image.getHeight(), null);
 	}
 }
