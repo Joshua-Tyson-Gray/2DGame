@@ -19,11 +19,6 @@ public class SceneTopDown implements KeyListener{
 	//TODO: Make a Scene class as a parent class that will be the KeyListener
 	//TODO: Make Scenes dynamic by loaded from a properties file
 	//TODO: Improve performance by only rendering that part of the image that is displayed
-	private final int scale = 2;
-	public boolean upPressed = false;
-	public boolean downPressed = false;
-	public boolean rightPressed = false;
-	public boolean leftPressed = false;
 	
 	public static final int DEFAULT_UP_FACTOR = -1;
 	public static final int DEFAULT_DOWN_FACTOR = 1;
@@ -32,6 +27,8 @@ public class SceneTopDown implements KeyListener{
 	
 	public int upFactor, downFactor, rightFactor, leftFactor;
 	private int sceneOriginX, sceneOriginY;
+	private final int scale = 2;
+	public boolean upPressed, downPressed, rightPressed, leftPressed;
 	
 	private PlayerTopDown player;
 	private Map map;
@@ -41,15 +38,23 @@ public class SceneTopDown implements KeyListener{
 	 * @param inpCtrl
 	 */
 	public SceneTopDown() {
+		initializeKeyListenerValues();
 		GameManager gm = GameManager.getInstance();
 		sceneOriginX = gm.getWindowWidth() / 2;
 		sceneOriginY = gm.getWindowHeight() / 2;
+		this.player = new PlayerTopDown(this, "/player/zelda.properties", sceneOriginX, sceneOriginY);
+		this.map = new Map(this, -100, -100, "/maps/castle.png");
+	}
+	
+	private void initializeKeyListenerValues() {
 		upFactor = 0;
 		downFactor = 0;
 		rightFactor = 0;
 		leftFactor = 0;
-		this.player = new PlayerTopDown(this, "/player/zelda.properties", sceneOriginX, sceneOriginY);
-		this.map = new Map(this, -100, -100, "/maps/castle.png");
+		upPressed = false;
+		downPressed = false;
+		rightPressed = false;
+		leftPressed = false;
 	}
 	
 	/**
@@ -81,9 +86,9 @@ public class SceneTopDown implements KeyListener{
 	 */
 	public void updateScene() {
 		int playerSpeed = player.getCurrentSpeed();
-		int deltaX = playerSpeed * (leftFactor + rightFactor);
-		int deltaY = playerSpeed * (upFactor + downFactor);
 		
+		// Calculate what portion of the horizontal movement the map and player should each move.
+		int deltaX = playerSpeed * (leftFactor + rightFactor);
 		if(deltaX != 0) {
 			int mapMarginLeft = map.getXPos();
 			int mapMarginRight = map.getXPos() + map.getMapWidth() - GameManager.getInstance().getWidth();
@@ -93,6 +98,8 @@ public class SceneTopDown implements KeyListener{
 			player.updateXPos(deltaX + mapDeltaX);
 		}
 		
+		// Calculate what portion of the vertical movement the map and the player should each move.
+		int deltaY = playerSpeed * (upFactor + downFactor);
 		if(deltaY != 0) {
 			int mapMarginTop = map.getYPos();
 			int mapMarginBottom = map.getYPos() + map.getMapHeight() - GameManager.getInstance().getHeight();
@@ -106,6 +113,7 @@ public class SceneTopDown implements KeyListener{
 		player.update();
 	}
 	
+	// Calculates what portion of delta (the movement) the map should make in one linear direction.
 	private int calculateMapDelta(int delta, int mapMarginLower, int mapMarginUpper, int playerOffset) {
 		// The delta variable is relative to the player, so the value returned is multiplied by -1 to make it relative to the map
 		int mapDelta = 0;
