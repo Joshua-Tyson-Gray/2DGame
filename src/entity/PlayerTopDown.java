@@ -89,22 +89,6 @@ public class PlayerTopDown extends EntityTopDown{
 			spriteSheet.setAnimDirection(WEST);
 		}
 		
-//		if(!scene.isPlayerLocked()) {
-//			//Update location
-//			if(scene.upPressed) {
-//				yLoc -= currentSpeed;
-//			}
-//			if(scene.downPressed) {
-//				yLoc += currentSpeed;
-//			}
-//			if(scene.leftPressed) {
-//				xLoc -= currentSpeed;
-//			}
-//			if(scene.rightPressed) {
-//				xLoc += currentSpeed;
-//			}
-//		}
-		
 //		if(!inpCtrl.rightPressed && !inpCtrl.leftPressed && !inpCtrl.upPressed && !inpCtrl.downPressed) {
 //			switch(direction) {
 //			case Player.NORTH:

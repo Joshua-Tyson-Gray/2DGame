@@ -97,6 +97,22 @@ public class Map extends Entity{
 	public int getMapHeight() {
 		return map.getHeight() * scene.getScale();
 	}
+	
+	/**
+	 * Gets the width of the map in pixels. This value is before scaling.
+	 * @return
+	 */
+	public int getRawMapWidth() {
+		return map.getWidth();
+	}
+	
+	/**
+	 * Gets the height of the map in pixels. This value is before scaling.
+	 * @return
+	 */
+	public int getRawMapHeight() {
+		return map.getHeight();
+	}
 
 	@Override
 	public void update() {

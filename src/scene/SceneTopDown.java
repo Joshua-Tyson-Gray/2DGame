@@ -25,6 +25,16 @@ public class SceneTopDown implements KeyListener{
 	public boolean rightPressed = false;
 	public boolean leftPressed = false;
 	
+	public static final int DEFAULT_UP_FACTOR = -1;
+	public static final int DEFAULT_DOWN_FACTOR = 1;
+	public static final int DEFAULT_RIGHT_FACTOR = 1;
+	public static final int DEFAULT_LEFT_FACTOR = -1;
+	
+	public int upFactor, downFactor, rightFactor, leftFactor;
+	
+	public boolean mapOverflowX;
+	public boolean mapOverflowY;
+	
 	private PlayerTopDown player;
 	private Map map;
 
@@ -33,9 +43,16 @@ public class SceneTopDown implements KeyListener{
 	 * @param inpCtrl
 	 */
 	public SceneTopDown() {
+		upFactor = 0;
+		downFactor = 0;
+		rightFactor = 0;
+		leftFactor = 0;
 		GameManager gm = GameManager.getInstance();
 		this.player = new PlayerTopDown(this, "/player/zelda.properties", gm.getWindowWidth() / 2, gm.getWindowHeight() / 2);
-		this.map = new Map(this, 0, 0, "/maps/castle.png");
+		this.map = new Map(this, -100, -100, "/maps/castle.png");
+		
+		mapOverflowX = map.getMapWidth() > gm.getWidth();
+		mapOverflowY = map.getMapHeight() > gm.getHeight();
 	}
 	
 	/**
@@ -51,39 +68,62 @@ public class SceneTopDown implements KeyListener{
 	 */
 	public void updateScene() {
 		int playerSpeed = player.getCurrentSpeed();
-		int deltaY = 0;
-		int deltaX = 0;
-		
-		
-		
-		//Update location
-		if(upPressed) {
-			deltaY -= playerSpeed;
-		}
-		if(downPressed) {
-			deltaY += playerSpeed;
-		}
-		if(leftPressed) {
-			deltaX -= playerSpeed;
-		}
-		if(rightPressed) {
-			deltaX += playerSpeed;
-		}
+		// Deltas are relative to the player. To make them relative to the map, multiply them by -1.
+		int deltaY = playerSpeed * (upFactor + downFactor);
+		int deltaX = playerSpeed * (leftFactor + rightFactor);
+		int mapXPos = map.getXPos();
+		int mapYPos = map.getYPos();
 
+		int mapMarginLeft = mapXPos;
+		int mapMarginRight = mapXPos + map.getRawMapWidth() - GameManager.getInstance().getWidth();
+		int mapMarginTop = mapYPos;
+		int mapmarginBottom = mapYPos + map.getRawMapHeight() - GameManager.getInstance().getHeight();
+		
+		if(deltaX < 0) {
+			map.updatePosX((deltaX<0)? : );
+		}else if(deltaX > 0) {
+			
+		}
+		
+		
+		if(deltaX != 0) {
+			if(deltaX < 0) {
+				
+			}
+		}
+		if(deltaY != 0) {
+			
+		}
+		
+//		if(deltaX != 0 && mapOverflowX) {
+//			int mapDeltaX = (mapXPos / deltaX) * deltaX;
+//			int playerDeltaX = deltaX - mapDeltaX;
+//			map.updateXPos(-mapDeltaX);
+//			player.updateXPos(playerDeltaX);
+//		}else if(deltaX != 0){
+//			player.updateXPos(deltaX);
+//		}
+//		if(deltaY != 0 && mapOverflowY) {
+//			int mapDeltaY = (mapYPos / deltaY) * deltaY;
+//			int playerDeltaY = deltaY - mapDeltaY;
+//			map.updateYPos(-mapDeltaY);
+//			player.updateYPos(playerDeltaY);
+//		}else if(deltaY != 0){
+//			player.updateYPos(deltaY);
+//		}		
+		
 		//Check if the bounds of the map are hit
 		//TODO: Account for recentering the player
-		int mapX = map.getXPos();
-		int mapY = map.getYPos();
-		if(deltaX < 0 && mapX - deltaX < 0 || deltaX > 0 && mapX + map.getMapWidth() - deltaX > GameManager.getInstance().getWindowWidth()){
-			map.updateXPos(-deltaX);
-		}else {
-			player.updateXPos(deltaX);
-		}
-		if(deltaY < 0 && mapY - deltaY < 0 || deltaY > 0 && mapY + map.getMapHeight() - deltaY > GameManager.getInstance().getWindowHeight()) {
-			map.updateYPos(-deltaY);
-		}else {
-			player.updateYPos(deltaY);
-		}
+//		if(deltaX < 0 && mapXPos - deltaX < 0 || deltaX > 0 && mapXPos + map.getMapWidth() - deltaX > GameManager.getInstance().getWindowWidth()) {
+//			map.updateXPos(-deltaX);
+//		}else {
+//			player.updateXPos(deltaX);
+//		}
+//		if(deltaY < 0 && mapYPos - deltaY < 0 || deltaY > 0 && mapYPos + map.getMapHeight() - deltaY > GameManager.getInstance().getWindowHeight()) {
+//			map.updateYPos(-deltaY);
+//		}else {
+//			player.updateYPos(deltaY);
+//		}
 		
 		map.update();
 		player.update();
@@ -112,15 +152,19 @@ public class SceneTopDown implements KeyListener{
 		switch(keyCode) {
 			case KeyEvent.VK_W:
 				upPressed = true;
+				upFactor = DEFAULT_UP_FACTOR;
 				break;
 			case KeyEvent.VK_S:
 				downPressed = true;
+				downFactor = DEFAULT_DOWN_FACTOR;
 				break;
 			case KeyEvent.VK_A:
 				leftPressed = true;
+				leftFactor = DEFAULT_LEFT_FACTOR;
 				break;
 			case KeyEvent.VK_D:
 				rightPressed = true;
+				rightFactor = DEFAULT_RIGHT_FACTOR;
 				break;
 		}		
 	}
@@ -131,15 +175,19 @@ public class SceneTopDown implements KeyListener{
 		switch(keyCode) {
 			case KeyEvent.VK_W:
 				upPressed = false;
+				upFactor = 0;
 				break;
 			case KeyEvent.VK_S:
 				downPressed = false;
+				downFactor = 0;
 				break;
 			case KeyEvent.VK_A:
 				leftPressed = false;
+				leftFactor = 0;
 				break;
 			case KeyEvent.VK_D:
 				rightPressed = false;
+				rightFactor = 0;
 				break;
 		}
 	}
