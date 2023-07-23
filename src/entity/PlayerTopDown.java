@@ -54,6 +54,22 @@ public class PlayerTopDown extends EntityTopDown{
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * Gets the offset of the player's horizontal distance from the scene's origin.
+	 * @return distance in pixels
+	 */
+	public int getPlayerOffsetX() {
+		return xPos - scene.getSceneOriginX();
+	}
+	
+	/**
+	 * Gets the offset of the player's vertical distance from the scene's origin.
+	 * @return distance in pixels
+	 */
+	public int getPlayerOffsetY() {
+		return yPos - scene.getSceneOriginY();
+	}
 
 	@Override
 	public void update() {
