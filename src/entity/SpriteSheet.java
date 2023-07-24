@@ -7,53 +7,59 @@ import java.util.Properties;
 
 import javax.imageio.ImageIO;
 
+import gameEngine.GameManager;
+
 /**
  * Stores the sprites and animation data necessary for an entity.
  * @author tyson
  *
  */
 public class SpriteSheet {
-	private BufferedImage spriteSheet;
-	private HashMap<String, SpriteAnimation> animationData;
-	private String animType;
-	private String animDirection;
 	public static final String WALK = "walk";
 	public static final String IDLE = "idle";
+	
+	private BufferedImage spriteSheet;
+	private HashMap<String, SpriteAnimation> animationData;
+	private SpriteAnimation currentAnim;
+	private String direction;
 
 	/**
-	 * Generates a SpriteSheet from the image path passed.
-	 * @param spriteSheetPath Path to the sprite sheet
-	 * @param FPS frames per second determined by game loop
+	 * Generates a SpriteSheet from the properties object passed.
+	 * @param props Properties object containing spritesheet data
 	 */
-	public SpriteSheet(Properties prop, int FPS) throws IOException{
+	public SpriteSheet(Properties props) throws IOException{
 		try {
-			spriteSheet = ImageIO.read(getClass().getResourceAsStream(prop.getProperty("spriteSheet_path")));
+			spriteSheet = ImageIO.read(getClass().getResourceAsStream(props.getProperty("spriteSheet_path")));
 		}catch(IOException e) {
 			throw e;
 		}
 		animationData = new HashMap<String, SpriteAnimation>();
 		//Dynamically load animation data from properties file
-		for(String key : prop.stringPropertyNames()) {
-			if(key.substring(0, 4).equals("anim") && key.substring(key.length() - 4, key.length()).equals("name")) {
-				String animName = prop.getProperty(key);
+		for(String key : props.stringPropertyNames()) {
+			if(key.substring(0, 4).equals("anim") && key.substring(key.length() - 4).equals("name")) {
+				String animName = props.getProperty(key);
 				//Get property values and continue if one is missing
-				String x = prop.getProperty("anim_" + animName + "_xStart");
+				String x = props.getProperty("anim_" + animName + "_xStart");
 				if(x == null) continue;
-				String y = prop.getProperty("anim_" + animName + "_yStart");
+				String y = props.getProperty("anim_" + animName + "_yStart");
 				if(y == null) continue;
-				String numFrames = prop.getProperty("anim_" + animName + "_numFrames");
+				String numFrames = props.getProperty("anim_" + animName + "_numFrames");
 				if(numFrames == null) continue;
-				String tileSizeX = prop.getProperty("anim_" + animName + "_tileSizeX");
+				String tileSizeX = props.getProperty("anim_" + animName + "_tileSizeX");
 				if(tileSizeX == null) continue;
-				String tileSizeY = prop.getProperty("anim_" + animName + "_tileSizeY");
+				String tileSizeY = props.getProperty("anim_" + animName + "_tileSizeY");
 				if(tileSizeY == null) continue;
-				String flipHorizontally = prop.getProperty("anim_" + animName + "_flipHorizontally");
+				String flipHorizontally = props.getProperty("anim_" + animName + "_flipHorizontally");
 				if(flipHorizontally == null) continue;
-				String speed = prop.getProperty("anim_" + animName + "_speed");
+				String speed = props.getProperty("anim_" + animName + "_speed");
 				if(speed == null) continue;
+				String direction = props.getProperty("anim_" + animName + "_direction");
+				if(direction == null) continue;
+				String type = props.getProperty("anim_" + animName + "_type");
+				if(type == null) continue;
 				
 				//Add the animation
-				animationData.put(prop.getProperty(key), new SpriteAnimation(
+				animationData.put(props.getProperty(key), new SpriteAnimation(
 						spriteSheet, 
 						Integer.parseInt(x), 
 						Integer.parseInt(y), 
@@ -62,39 +68,52 @@ public class SpriteSheet {
 						Integer.parseInt(tileSizeY), 
 						Boolean.parseBoolean(flipHorizontally), 
 						Integer.parseInt(speed), 
-						FPS
+						type,
+						direction,
+						GameManager.getInstance().getFPS()
 				));
 			}
 		}
+		// If no animations, just load a single frame animation of the entire spritesheet.
+		if(animationData.keySet().isEmpty()) {
+			direction = EntityTopDown.SOUTH;
+			currentAnim = new SpriteAnimation(spriteSheet, 0, 0, 1, spriteSheet.getWidth(), spriteSheet.getHeight(), false, 0, IDLE, direction, GameManager.getInstance().getFPS());
+			animationData.put(IDLE + direction, currentAnim);
+		}else {
+			direction = props.getProperty("default_start_direction");
+			String animType = props.getProperty("default_start_type");
+			currentAnim = animationData.get(animType + direction);
+		}
 		
-		this.animDirection = prop.getProperty("default_start_direction");
-		this.animType = prop.getProperty("default_start_type");
-		animationData.get(getAnimName()).resetAnim();
+		currentAnim.resetAnim();
 	}
 	
 	/**
-	 * Gets the direction of the animation.
+	 * Gets the direction of the animation. If direction is not applicable, the empty string is returned.
 	 * @return String
 	 */
-	public String getAnimDirection() {
-		return animDirection;
+	public String getDirection() {
+		return direction;
 	}
 	
 	/**
 	 * Sets the animation direction
-	 * @param animDirection
+	 * @param direction
 	 */
-	public void setAnimDirection(String animDirection) {
-		this.animDirection = animDirection;
-		setSpriteAnim();
+	public void setDirection(String direction) {
+		this.direction = direction;
+		setSpriteAnim(currentAnim.getAnimType());
 	}
 	
 	/**
-	 * Gets the animation type.
+	 * Gets the animation type. If there is no animation, returns null.
 	 * @return
 	 */
 	public String getAnimType() {
-		return animType;
+		if(currentAnim == null) {
+			return null;
+		}
+		return currentAnim.getAnimType();
 	}
 	
 	/**
@@ -102,33 +121,25 @@ public class SpriteSheet {
 	 * @param animType
 	 */
 	public void setAnimType(String animType) {
-		this.animType = animType;
-		setSpriteAnim();
+		setSpriteAnim(animType);
 	}
 	
 	/**
 	 * Sets the Sprite Animation based on the name of the animation passed. The function silently returns if the spriteName is not valid.
 	 * @param spriteName The animation to set
 	 */
-	private void setSpriteAnim() {
-		String spriteName = animType + animDirection;
-		if(!animationData.containsKey(spriteName)){
+	private void setSpriteAnim(String animType) {
+		String spriteName = animType + direction;
+		if(currentAnim != null && !animationData.containsKey(spriteName)){
 			//TODO: Log instead of printing to console
 			System.out.println("Sprite Animation " + spriteName + " was not loaded as it doesn't exist.");
 			return;
 		}
 		//Only reset the spriteFrame number if the spriteName changed
 		if(!this.getAnimName().equals(spriteName)) {
-			this.animationData.get(getAnimName()).resetAnim();
+			currentAnim = this.animationData.get(spriteName);
+			currentAnim.resetAnim();
 		}
-	}
-	
-	public int getFrameWidth() {
-		return -1;
-	}
-	
-	public int getFrameHeight() {
-		return -1;
 	}
 	
 	/**
@@ -136,14 +147,16 @@ public class SpriteSheet {
 	 * @return
 	 */
 	public String getAnimName() {
-		return animType + animDirection;
+		return currentAnim.getAnimType() + direction;
 	}
 	
 	/**
 	 * Updates the sprite frame if the appropriate time has passed. Should be run every frame in each second.
 	 */
 	public void updateSpriteFrame() {
-		animationData.get(getAnimName()).update();
+		if(currentAnim != null) {
+			animationData.get(getAnimName()).update();
+		}
 	}
 	
 	/**
@@ -152,6 +165,9 @@ public class SpriteSheet {
 	 * @return BufferedImage of the sprite corresponding to the key
 	 */
 	public BufferedImage getSpriteFrame() {
-		return animationData.get(getAnimName()).getFrame();
+		if(currentAnim != null) {
+			return animationData.get(getAnimName()).getFrame();
+		}
+		return spriteSheet;
 	}
 }

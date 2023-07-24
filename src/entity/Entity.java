@@ -1,7 +1,6 @@
 package entity;
 
 import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
 
 import scene.SceneTopDown;
 
@@ -19,7 +18,6 @@ public abstract class Entity{
 
 	protected SpriteSheet spriteSheet;
 	protected SceneTopDown scene;
-	protected BufferedImage image;
 
 	/**
 	 * Updates the data of the entity.
@@ -31,7 +29,7 @@ public abstract class Entity{
 	 * @param g2
 	 */
 	public void render(Graphics2D g2, int scale) {
-		g2.drawImage(image, xPos * scale, yPos * scale, getWidth() * scale, getHeight() * scale, null);
+		g2.drawImage(spriteSheet.getSpriteFrame(), xPos * scale, yPos * scale, getWidth() * scale, getHeight() * scale, null);
 	}
 	
 	/**
@@ -39,7 +37,7 @@ public abstract class Entity{
 	 * @return width after scaling in pixels
 	 */
 	public int getWidth() {
-		return image.getWidth();
+		return spriteSheet.getSpriteFrame().getWidth();
 	}
 	
 	/**
@@ -47,7 +45,7 @@ public abstract class Entity{
 	 * @return height after scaling in pixels
 	 */
 	public int getHeight() {
-		return image.getHeight();
+		return spriteSheet.getSpriteFrame().getHeight();
 	}
 	
 	/**

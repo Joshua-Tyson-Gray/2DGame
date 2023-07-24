@@ -18,6 +18,8 @@ public class SpriteAnimation {
 	private int frameInterval;
 	private int currentFrame;
 	private int updateCounter;
+	private String animType;
+	private String animDirection;
 	
 	private BufferedImage spriteSheet;
 	
@@ -33,7 +35,7 @@ public class SpriteAnimation {
 	 * @param speed time in milliseconds for how long it should take to complete one cycle of the animation
 	 * @param FPS frames per second determined by the game loop
 	 */
-	public SpriteAnimation(BufferedImage spriteSheet, int x, int y, int numFrames, int width, int height, boolean flipHorizontally, int speed, int FPS){
+	public SpriteAnimation(BufferedImage spriteSheet, int x, int y, int numFrames, int width, int height, boolean flipHorizontally, int speed, String animType, String animDirection, int FPS){
 		this.x = x;
 		this.y = y;
 		this.numFrames = numFrames;
@@ -44,12 +46,33 @@ public class SpriteAnimation {
 		this.frameInterval = (int)Math.round((speed / 1000.0) * FPS / numFrames);
 		this.currentFrame = 0;
 		this.updateCounter = 0;
+		this.animType = animType;
+		this.animDirection = animDirection;
+	}
+	
+	/**
+	 * Gets the animation type. If there is no animation, returns null.
+	 * @return
+	 */
+	public String getAnimType() {
+		return animType;
+	}
+	
+	/**
+	 * Gets the direction of the animation.
+	 * @return String
+	 */
+	public String getAnimDirection() {
+		return animDirection;
 	}
 	
 	/**
 	 * Updates the animation frame if the appropriate time has elapsed.
 	 */
 	public void update() {
+		if(numFrames == 1) {
+			return;
+		}
 		updateCounter++;
 		if(updateCounter > frameInterval) {
 			if(currentFrame + 1 == numFrames) {

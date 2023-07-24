@@ -5,7 +5,6 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Properties;
 
-import gameEngine.GameManager;
 import scene.SceneTopDown;
 
 /**
@@ -46,7 +45,7 @@ public class PlayerTopDown extends EntityTopDown{
 		this.defaultDiagonalSpeed = (int)Math.round(sine45 * defaultSpeed);
 		
 		try {
-			this.spriteSheet = new SpriteSheet(playerProps, GameManager.getInstance().getFPS());
+			this.spriteSheet = new SpriteSheet(playerProps);
 		}catch (IOException e) {
 			//TODO: Log instead of printing to screen
 			System.out.println("Sprite Sheet could not be loaded.");
@@ -86,22 +85,22 @@ public class PlayerTopDown extends EntityTopDown{
 		}
 		
 		//Determine Animation Direction
-		if(scene.rightPressed && scene.upPressed && (spriteSheet.getAnimDirection() != NORTH || spriteSheet.getAnimDirection() != EAST)) {
-			spriteSheet.setAnimDirection(NORTH);
-		}else if(scene.leftPressed && scene.upPressed && (spriteSheet.getAnimDirection() != NORTH || spriteSheet.getAnimDirection() != WEST)) {
-			spriteSheet.setAnimDirection(NORTH);
-		}else if(scene.leftPressed && scene.downPressed && (spriteSheet.getAnimDirection() != SOUTH || spriteSheet.getAnimDirection() != WEST)) {
-			spriteSheet.setAnimDirection(SOUTH);
-		}else if(scene.rightPressed && scene.downPressed && (spriteSheet.getAnimDirection() != SOUTH || spriteSheet.getAnimDirection() != EAST)) {
-			spriteSheet.setAnimDirection(SOUTH);
+		if(scene.rightPressed && scene.upPressed && (spriteSheet.getDirection() != NORTH || spriteSheet.getDirection() != EAST)) {
+			spriteSheet.setDirection(NORTH);
+		}else if(scene.leftPressed && scene.upPressed && (spriteSheet.getDirection() != NORTH || spriteSheet.getDirection() != WEST)) {
+			spriteSheet.setDirection(NORTH);
+		}else if(scene.leftPressed && scene.downPressed && (spriteSheet.getDirection() != SOUTH || spriteSheet.getDirection() != WEST)) {
+			spriteSheet.setDirection(SOUTH);
+		}else if(scene.rightPressed && scene.downPressed && (spriteSheet.getDirection() != SOUTH || spriteSheet.getDirection() != EAST)) {
+			spriteSheet.setDirection(SOUTH);
 		}else if(scene.upPressed){
-			spriteSheet.setAnimDirection(NORTH);
+			spriteSheet.setDirection(NORTH);
 		}else if(scene.downPressed){
-			spriteSheet.setAnimDirection(SOUTH);
+			spriteSheet.setDirection(SOUTH);
 		}else if(scene.rightPressed){
-			spriteSheet.setAnimDirection(EAST);
+			spriteSheet.setDirection(EAST);
 		}else if(scene.leftPressed){
-			spriteSheet.setAnimDirection(WEST);
+			spriteSheet.setDirection(WEST);
 		}
 		
 //		if(!inpCtrl.rightPressed && !inpCtrl.leftPressed && !inpCtrl.upPressed && !inpCtrl.downPressed) {

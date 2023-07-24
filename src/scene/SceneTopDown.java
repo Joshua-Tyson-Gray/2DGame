@@ -4,9 +4,12 @@ import java.awt.Graphics2D;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Properties;
 
 import entity.PlayerTopDown;
-import entity.WorldObject;
+import entity.StaticWorldObject;
 import gameEngine.GameManager;
 
 /**
@@ -34,20 +37,41 @@ public class SceneTopDown implements KeyListener{
 	
 	private PlayerTopDown player;
 	private Map map;
-	private WorldObject asset;
+	private HashMap<String, StaticWorldObject> assets;
 
 	/**
 	 * Constructor for WorldData. Initializes entities and assets to their default values.
 	 * @param inpCtrl
 	 */
 	public SceneTopDown() {
+		Properties sceneProps = new Properties();
+		try{
+			sceneProps.load(getClass().getResourceAsStream("/scenes/castle/assets/scene_castle_assets.properties"));
+		}catch(IOException e) {
+			//TODO: Log to file instead of printing to screen
+			System.out.println("Player properties file could not be loaded.");
+			e.printStackTrace();
+		}
+		
 		initializeKeyListenerValues();
 		GameManager gm = GameManager.getInstance();
 		sceneOriginX = gm.getWindowWidth() / (2 * scale);
 		sceneOriginY = gm.getWindowHeight() / (2 * scale);
 		this.player = new PlayerTopDown(this, "/player/zelda.properties", sceneOriginX, sceneOriginY);
 		this.map = new Map(this, "/scenes/castle/castle.png", 0, 0);
-		this.asset = new WorldObject(this, "/scenes/castle/assets/main_wall_vert.png", 17, 0);
+		this.assets = new HashMap<String, StaticWorldObject>();
+		
+		//Dynamically load all assets from scene properties file
+		for(String key : sceneProps.stringPropertyNames()) {
+			if(key.substring(0,5).equals("asset") && key.substring(key.length() - 4).equals("name")) {
+				String assetName = sceneProps.getProperty(key);
+				String filepath = sceneProps.getProperty("asset_" + assetName + "_spriteSheet_path");
+				int defaultX = Integer.parseInt(sceneProps.getProperty("asset_" + assetName + "_default_x"));
+				int defaultY = Integer.parseInt(sceneProps.getProperty("asset_" + assetName + "_default_y"));
+				this.assets.put(assetName, new StaticWorldObject(this, filepath, defaultX, defaultY));
+			}
+		}
+		this.assets.put("main_wall_vert", new StaticWorldObject(this, "/scenes/castle/assets/main_wall_vert.png", 17, 0));
 	}
 	
 	// Initialize variables used by key listener to default values.
@@ -83,6 +107,7 @@ public class SceneTopDown implements KeyListener{
 	 */
 	public void updateScene() {
 		int playerSpeed = player.getCurrentSpeed();
+		//TODO: Still jumping when player moves to the center from the East
 		
 		// Calculate what portion of the horizontal movement the map and player should each move.
 		int deltaX = playerSpeed * (leftFactor + rightFactor);
@@ -92,7 +117,9 @@ public class SceneTopDown implements KeyListener{
 			int playerOffset = player.getPlayerOffsetX();
 			int mapDeltaX = calculateMapDelta(deltaX, mapMarginLeft, mapMarginRight, playerOffset);
 			map.updateXPos(mapDeltaX);
-			asset.updateXPos(mapDeltaX);
+			assets.forEach((name, asset) -> {
+				asset.updateXPos(mapDeltaX);
+			});
 			player.updateXPos(deltaX + mapDeltaX);
 		}
 		
@@ -104,13 +131,17 @@ public class SceneTopDown implements KeyListener{
 			int playerOffset = player.getPlayerOffsetY();
 			int mapDeltaY = calculateMapDelta(deltaY, mapMarginTop, mapMarginBottom, playerOffset);
 			map.updateYPos(mapDeltaY);
-			asset.updateYPos(mapDeltaY);
+			assets.forEach((name, asset) -> {
+				asset.updateYPos(mapDeltaY);
+			});
 			player.updateYPos(deltaY + mapDeltaY);
 		}
 		
 		map.update();
 		player.update();
-		asset.update();
+		assets.forEach((name, asset) -> {
+			asset.update();
+		});
 	}
 	
 	// Calculates what portion of delta (the movement) the map should make in one linear direction.
@@ -143,7 +174,9 @@ public class SceneTopDown implements KeyListener{
 		//TODO: Refactor to calculate a BufferedImage with everything and draw that.
 		map.render(g2, scale);
 		player.render(g2, scale);
-		asset.render(g2, scale);
+		assets.forEach((name, asset) -> {
+			asset.render(g2, scale);
+		});
 	}
 	
 	/**

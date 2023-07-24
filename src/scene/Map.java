@@ -1,10 +1,10 @@
 package scene;
 
 import java.io.IOException;
-
-import javax.imageio.ImageIO;
+import java.util.Properties;
 
 import entity.Entity;
+import entity.SpriteSheet;
 
 /**
  * Represents the base of a level or scene. It constitutes the background and manages any data associated with it.
@@ -25,7 +25,9 @@ public class Map extends Entity{
 		this.xPos = xPos;
 		this.yPos = yPos;
 		try {
-			image = ImageIO.read(getClass().getResourceAsStream(imageFilePath));
+			Properties props = new Properties();
+			props.setProperty("spriteSheet_path", imageFilePath);
+			spriteSheet = new SpriteSheet(props);
 		}catch(IOException e) {
 			//TODO: Properly handle exception and print to logs
 			e.printStackTrace();
@@ -73,29 +75,13 @@ public class Map extends Entity{
 	public int getYPos() {
 		return yPos;
 	}
-//	
-//	/**
-//	 * Gets the width of the map image. The number returned is the number of pixels after scaling.
-//	 * @return width of the map image
-//	 */
-//	public int getMapWidth() {
-//		return image.getWidth() * scene.getScale();
-//	}
-//	
-//	/**
-//	 * Gets the height of the map image. The number returned is the number of pixels after scaling.
-//	 * @return height of the map image
-//	 */
-//	public int getMapHeight() {
-//		return image.getHeight() * scene.getScale();
-//	}
 	
 	/**
 	 * Gets the width of the map in pixels. This value is before scaling.
 	 * @return
 	 */
 	public int getRawMapWidth() {
-		return image.getWidth();
+		return spriteSheet.getSpriteFrame().getWidth();
 	}
 	
 	/**
@@ -103,7 +89,7 @@ public class Map extends Entity{
 	 * @return
 	 */
 	public int getRawMapHeight() {
-		return image.getHeight();
+		return spriteSheet.getSpriteFrame().getHeight();
 	}
 
 	@Override
