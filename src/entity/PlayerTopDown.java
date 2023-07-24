@@ -19,11 +19,10 @@ public class PlayerTopDown extends EntityTopDown{
 	 * Constructor for the Player entity.
 	 * @param scene The world in which the player entity resides
 	 * @param playerPropFilePath properties file for the player configuration
-	 * @param xLoc The X location of the player
-	 * @param yLoc The Y location of the player
-	 * @param playerLocked indicated if the players position is locked in place at the coordinates provided
+	 * @param xPos The X location of the player. Passed value should account for any scaling.
+	 * @param yPos The Y location of the player. Passed value should account for any scaling.
 	 */
-	public PlayerTopDown(SceneTopDown scene, String playerPropFilePath, int xLoc, int yLoc) {
+	public PlayerTopDown(SceneTopDown scene, String playerPropFilePath, int xPos, int yPos) {
 		this.scene = scene;
 		
 		//Load player properties
@@ -37,8 +36,8 @@ public class PlayerTopDown extends EntityTopDown{
 		}
 		
 		//Set default location
-		this.xPos = xLoc;
-		this.yPos = yLoc;
+		this.xPos = xPos;
+		this.yPos = yPos;
 		
 		//Set speed of character
 		this.defaultSpeed = Integer.parseInt(playerProps.getProperty("default_speed"));
@@ -171,10 +170,10 @@ public class PlayerTopDown extends EntityTopDown{
 	}
 
 	@Override
-	public void render(Graphics2D g2) {
+	public void render(Graphics2D g2, int scale) {
 		BufferedImage image = spriteSheet.getSpriteFrame();
-		int exactXPos = xPos - ( (image.getWidth() * scene.getScale()) / 2 );
-		int exactYPos = yPos - ( (image.getHeight() * scene.getScale()) / 2 );
-		g2.drawImage(image, exactXPos, exactYPos, scene.getScale() * image.getWidth(), scene.getScale() * image.getHeight(), null);
+		int exactXPos = (xPos - ( image.getWidth() / 2 )) * scale;
+		int exactYPos = (yPos - ( image.getHeight() / 2 )) * scale;
+		g2.drawImage(image, exactXPos, exactYPos, image.getWidth() * scale, image.getHeight() * scale, null);
 	}
 }

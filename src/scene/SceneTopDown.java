@@ -6,6 +6,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 import entity.PlayerTopDown;
+import entity.WorldObject;
 import gameEngine.GameManager;
 
 /**
@@ -25,13 +26,15 @@ public class SceneTopDown implements KeyListener{
 	public static final int DEFAULT_RIGHT_FACTOR = 1;
 	public static final int DEFAULT_LEFT_FACTOR = -1;
 	
+	private final int scale = 2;
+	
 	public int upFactor, downFactor, rightFactor, leftFactor;
 	private int sceneOriginX, sceneOriginY;
-	private final int scale = 2;
 	public boolean upPressed, downPressed, rightPressed, leftPressed;
 	
 	private PlayerTopDown player;
 	private Map map;
+	private WorldObject asset;
 
 	/**
 	 * Constructor for WorldData. Initializes entities and assets to their default values.
@@ -40,12 +43,14 @@ public class SceneTopDown implements KeyListener{
 	public SceneTopDown() {
 		initializeKeyListenerValues();
 		GameManager gm = GameManager.getInstance();
-		sceneOriginX = gm.getWindowWidth() / 2;
-		sceneOriginY = gm.getWindowHeight() / 2;
+		sceneOriginX = gm.getWindowWidth() / (2 * scale);
+		sceneOriginY = gm.getWindowHeight() / (2 * scale);
 		this.player = new PlayerTopDown(this, "/player/zelda.properties", sceneOriginX, sceneOriginY);
-		this.map = new Map(this, -100, -100, "/maps/castle.png");
+		this.map = new Map(this, "/scenes/castle/castle.png", 0, 0);
+		this.asset = new WorldObject(this, "/scenes/castle/assets/main_wall_vert.png", 17, 0);
 	}
 	
+	// Initialize variables used by key listener to default values.
 	private void initializeKeyListenerValues() {
 		upFactor = 0;
 		downFactor = 0;
@@ -55,14 +60,6 @@ public class SceneTopDown implements KeyListener{
 		downPressed = false;
 		rightPressed = false;
 		leftPressed = false;
-	}
-	
-	/**
-	 * Gets the scale of the world.
-	 * @return scale factor
-	 */
-	public int getScale() {
-		return scale;
 	}
 	
 	/**
@@ -91,10 +88,11 @@ public class SceneTopDown implements KeyListener{
 		int deltaX = playerSpeed * (leftFactor + rightFactor);
 		if(deltaX != 0) {
 			int mapMarginLeft = map.getXPos();
-			int mapMarginRight = map.getXPos() + map.getMapWidth() - GameManager.getInstance().getWidth();
+			int mapMarginRight = map.getXPos() + map.getWidth() - GameManager.getInstance().getWidth() / scale;
 			int playerOffset = player.getPlayerOffsetX();
 			int mapDeltaX = calculateMapDelta(deltaX, mapMarginLeft, mapMarginRight, playerOffset);
 			map.updateXPos(mapDeltaX);
+			asset.updateXPos(mapDeltaX);
 			player.updateXPos(deltaX + mapDeltaX);
 		}
 		
@@ -102,15 +100,17 @@ public class SceneTopDown implements KeyListener{
 		int deltaY = playerSpeed * (upFactor + downFactor);
 		if(deltaY != 0) {
 			int mapMarginTop = map.getYPos();
-			int mapMarginBottom = map.getYPos() + map.getMapHeight() - GameManager.getInstance().getHeight();
+			int mapMarginBottom = map.getYPos() + map.getHeight() - GameManager.getInstance().getHeight() / scale;
 			int playerOffset = player.getPlayerOffsetY();
 			int mapDeltaY = calculateMapDelta(deltaY, mapMarginTop, mapMarginBottom, playerOffset);
 			map.updateYPos(mapDeltaY);
+			asset.updateYPos(mapDeltaY);
 			player.updateYPos(deltaY + mapDeltaY);
 		}
 		
 		map.update();
 		player.update();
+		asset.update();
 	}
 	
 	// Calculates what portion of delta (the movement) the map should make in one linear direction.
@@ -120,7 +120,7 @@ public class SceneTopDown implements KeyListener{
 		if( (delta > 0  && playerOffset < 0) || (delta < 0 && playerOffset > 0) ) {
 			// This condition is true if the player is not centered and is moving toward the origin. 
 			// In this case we want the player to move instead of the map.
-			mapDelta = -(Math.abs(playerOffset) < player.getCurrentSpeed() ? -(delta - player.getCurrentSpeed()) : 0);
+			mapDelta = -(Math.abs(playerOffset) < (player.getCurrentSpeed()) ? -(delta - (player.getCurrentSpeed())) : 0);
 		}else if(delta < 0 && mapMarginLower > delta) {
 			// This condition is true if the player is moving up but the map doesn't need to move a full iteration of the player's speed.
 			// In this case, move the map only as much as is needed.
@@ -140,8 +140,10 @@ public class SceneTopDown implements KeyListener{
 	 * @param g2
 	 */
 	public void renderScene(Graphics2D g2) {
-		map.render(g2);
-		player.render(g2);
+		//TODO: Refactor to calculate a BufferedImage with everything and draw that.
+		map.render(g2, scale);
+		player.render(g2, scale);
+		asset.render(g2, scale);
 	}
 	
 	/**

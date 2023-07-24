@@ -1,6 +1,7 @@
 package entity;
 
 import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 
 import scene.SceneTopDown;
 
@@ -18,6 +19,7 @@ public abstract class Entity{
 
 	protected SpriteSheet spriteSheet;
 	protected SceneTopDown scene;
+	protected BufferedImage image;
 
 	/**
 	 * Updates the data of the entity.
@@ -28,7 +30,25 @@ public abstract class Entity{
 	 * Draws the entity to the panel.
 	 * @param g2
 	 */
-	public abstract void render(Graphics2D g2);
+	public void render(Graphics2D g2, int scale) {
+		g2.drawImage(image, xPos * scale, yPos * scale, getWidth() * scale, getHeight() * scale, null);
+	}
+	
+	/**
+	 * Gets the width of the asset. The width returned accounts for the scaling of the scene.
+	 * @return width after scaling in pixels
+	 */
+	public int getWidth() {
+		return image.getWidth();
+	}
+	
+	/**
+	 * Gets the height of the asset. The height returned accounts for the scaling of the scene.
+	 * @return height after scaling in pixels
+	 */
+	public int getHeight() {
+		return image.getHeight();
+	}
 	
 	/**
 	 * Gets the current speed of the player.
